@@ -47,7 +47,7 @@ yX11_version       (void)
 
 
 char
-yXINIT_start (
+yX11_start (
       char     *a_name,                /* main window name                    */
       int       a_width,               /* window width                        */
       int       a_height,              /* window height                       */
@@ -83,9 +83,26 @@ yXINIT_start (
    return 0;
 }
 
+char
+yX11_resize          (int a_wide, int a_tall)
+{
+   /*---(shut the old down)----------------*/
+   XResizeWindow (DISP, BASE, a_wide, a_tall);
+   /*---(complete)-------------------------*/
+   return 0;
+}
 
 char
-yXINIT_end()
+yX11_move            (int a_xpos, int a_ypos)
+{
+   /*---(shut the old down)----------------*/
+   XMoveWindow (DISP, BASE, a_xpos, a_ypos);
+   /*---(complete)-------------------------*/
+   return 0;
+}
+
+char
+yX11_end             (void)
 {
    DEBUG_YXINIT printf("\nyXINIT -- heatherly xlib/glx destroy ---------------------------------------- (start)\n\n");
    yXINIT__gdestroy();

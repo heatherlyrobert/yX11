@@ -59,8 +59,8 @@
 
 /*===[[ VERSION ]]========================================*/
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define   YX11_VER_NUM      "1.0c"
-#define   YX11_VER_TXT      "move to make_program makefile enhancement"
+#define   YX11_VER_NUM      "1.0d"
+#define   YX11_VER_TXT      "added move and resize to really help changeable programs"
 
 
 /*===[[ XLIB HEADERS ]]=======================================================*/
@@ -159,8 +159,10 @@ extern  tXINIT  gXINIT;
 
 /*===[[ PROTOTYPES ]]=========================================================*/
 char      *yX11_version            (void);
-char       yXINIT_start            (char*, int, int, char, char, char);
-char       yXINIT_end              (void);
+char       yX11_start              (char*, int, int, char, char, char);
+char       yX11_resize             (int a_wide, int a_tall);
+char       yX11_move               (int a_xpos, int a_ypos);
+char       yX11_end                (void);
 ulong      yXINIT_focus            (void);
 
 
