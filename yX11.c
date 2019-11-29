@@ -84,6 +84,16 @@ yX11_start (
 }
 
 char
+yX11_screensize      (int *a_wide, int *a_tall, int *a_deep)
+{
+   if (DISP == NULL)   return -1;
+   if (a_wide != NULL)  *a_wide = DisplayWidth   (DISP, SCRN);
+   if (a_tall != NULL)  *a_tall = DisplayHeight  (DISP, SCRN);
+   if (a_deep != NULL)  *a_deep = DefaultDepth   (DISP, SCRN);
+   return 0;
+}
+
+char
 yX11_resize          (int a_wide, int a_tall)
 {
    /*---(shut the old down)----------------*/
@@ -289,7 +299,10 @@ char
 yXINIT__xdestroy()
 {
    DEBUG_YXINIT  printf("wrapping up of xwindows connection...\n");
-   /*---(connect)-------------------------------*/
+   /*---(wipe window)---------------------------*/
+   XUnmapWindow   (DISP, BASE);
+   XDestroyWindow (DISP, BASE);
+   /*---(disconnect)----------------------------*/
    DEBUG_YXINIT  printf("   - closing connection  . . . . . . . . . ");
    XCloseDisplay(DISP);
    DEBUG_YXINIT  printf("success\n");

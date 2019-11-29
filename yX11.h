@@ -57,95 +57,9 @@
 #ifndef YX11   
 #define YX11   loaded
 
-/*===[[ VERSION ]]========================================*/
-/* rapidly evolving version number to aid with visual change confirmation     */
-#define   YX11_VER_NUM      "1.0d"
-#define   YX11_VER_TXT      "added move and resize to really help changeable programs"
-
-
-/*===[[ XLIB HEADERS ]]=======================================================*/
-#include <X11/X.h>                   /* main header                           */
-#include <X11/Xlib.h>                /* c-api (xlib) header                   */
-#include <X11/Xutil.h>
-#include <X11/Xatom.h>               /* for setting up new protocol messages  */
-#include <X11/keysym.h>              /* for resolving keycodes/keysyms        */
-
-
-/*===[[ GLX HEADERS ]]========================================================*/
-#include <GL/gl.h>                   /* main header for opengl                */
-#include <GL/glx.h>                  /* for xlib/opengl integration           */
-
-
-/*===[[ CLIB HEADERS ]]=======================================================*/
-#include <stdio.h>
 
 
 
-/*===[[ TYPEDEFS ]]===========================================================*/
-typedef    unsigned long ulong;
-typedef    unsigned int  uint;
-typedef    unsigned char uchar;
-
-
-/*===[[ GLOBALS ]]============================================================*/
-struct cXINIT   {
-   char           name[300];
-   /*---(from xlib_connect)------------*/
-   Display       *disp;
-   int            scrn;
-   Screen        *scrn_ptr;
-   Window         root;  /* Window = unsigned long  */
-   Window         focu;
-   char           focu_name[300];
-   char           focusable;
-   char           resizeable;
-   /*---(from glx_connect)-------------*/
-   XVisualInfo   *visu;
-   /*---(from xlib_setup)--------------*/
-   Colormap       cmap;
-   Window         base;
-   GC             con1;
-   GC             con2;
-   XWMHints       wmhints;
-   /*---(from glx_setup)---------------*/
-   GLXContext     gcon;
-   /*---(from main loop)---------------*/
-   XEvent         evnt;
-   XKeyEvent      skey;
-   int            x, y;
-   uint           w, h;
-   /*---(other)------------------------*/
-   char           verbose;
-};
-typedef struct cXINIT tXINIT;
-extern  tXINIT  gXINIT;
-
-
-/*===[[ DATA MACROS ]]========================================================*/
-#define    VERBOSE         gXINIT.verbose
-#define    DEBUG_YXINIT    if (VERBOSE == 'y')
-
-#define    DISP       gXINIT.disp
-#define    SCRN       gXINIT.scrn
-#define    SCRN_PTR   gXINIT.scrn_ptr
-#define    ROOT       gXINIT.root
-#define    FOCU       gXINIT.focu
-#define    FOCU_NAME  gXINIT.focu_name
-#define    CAN_FOCUS  gXINIT.focusable
-#define    CAN_SIZE   gXINIT.resizeable
-#define    VISU       gXINIT.visu
-#define    CMAP       gXINIT.cmap
-#define    BASE       gXINIT.base
-#define    EVNT       gXINIT.evnt
-#define    SKEY       gXINIT.skey
-#define    GCON       gXINIT.gcon
-#define    HINTS      gXINIT.wmhints
-
-#define    TITLE      gXINIT.name
-#define    X          gXINIT.x
-#define    Y          gXINIT.y
-#define    WIDTH      gXINIT.w
-#define    HEIGHT     gXINIT.h
 
 #define    YX_FOCUSABLE   'y'
 #define    YX_HIDDEN      'n'
@@ -160,6 +74,7 @@ extern  tXINIT  gXINIT;
 /*===[[ PROTOTYPES ]]=========================================================*/
 char      *yX11_version            (void);
 char       yX11_start              (char*, int, int, char, char, char);
+char       yX11_screensize         (int *a_wide, int *a_tall, int *a_deep);
 char       yX11_resize             (int a_wide, int a_tall);
 char       yX11_move               (int a_xpos, int a_ypos);
 char       yX11_end                (void);
