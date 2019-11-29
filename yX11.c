@@ -1,7 +1,5 @@
 #include "yX11.h"
-#include <string.h>
-#include <stdlib.h>
-#include <memory.h>       /* malloc()                                         */
+#include "yX11_priv.h"
 
 char       yXINIT__xconnect        (void);
 char       yXINIT__xsetup          (void);
@@ -28,7 +26,7 @@ yX11_version       (void)
 #else
    strncpy (t, "[unknown  ]", 15);
 #endif
-   snprintf (yX11_ver, 100, "%s   %s : %s", t, YX11_VER_NUM, YX11_VER_TXT);
+   snprintf (yX11_ver, 100, "%s   %s : %s", t, P_VERNUM, P_VERTXT);
    return yX11_ver;
 }
 
