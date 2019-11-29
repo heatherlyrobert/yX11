@@ -84,10 +84,10 @@ yX11_start (
 char
 yX11_screensize      (int *a_wide, int *a_tall, int *a_deep)
 {
-   if (DISP == NULL)   return -1;
-   if (a_wide != NULL)  *a_wide = DisplayWidth   (DISP, SCRN);
-   if (a_tall != NULL)  *a_tall = DisplayHeight  (DISP, SCRN);
-   if (a_deep != NULL)  *a_deep = DefaultDepth   (DISP, SCRN);
+   if (YX_DISP == NULL)   return -1;
+   if (a_wide != NULL)  *a_wide = DisplayWidth   (YX_DISP, YX_SCRN);
+   if (a_tall != NULL)  *a_tall = DisplayHeight  (YX_DISP, YX_SCRN);
+   if (a_deep != NULL)  *a_deep = DefaultDepth   (YX_DISP, YX_SCRN);
    return 0;
 }
 
@@ -95,7 +95,7 @@ char
 yX11_resize          (int a_wide, int a_tall)
 {
    /*---(shut the old down)----------------*/
-   XResizeWindow (DISP, BASE, a_wide, a_tall);
+   XResizeWindow (YX_DISP, YX_BASE, a_wide, a_tall);
    /*---(complete)-------------------------*/
    return 0;
 }
@@ -104,7 +104,7 @@ char
 yX11_move            (int a_xpos, int a_ypos)
 {
    /*---(shut the old down)----------------*/
-   XMoveWindow (DISP, BASE, a_xpos, a_ypos);
+   XMoveWindow (YX_DISP, YX_BASE, a_xpos, a_ypos);
    /*---(complete)-------------------------*/
    return 0;
 }
@@ -128,50 +128,50 @@ yX11__xerror       (Display *a_disp, XErrorEvent *a_event)
 char
 yXINIT__xconnect()
 {
-   DEBUG_YXINIT  printf("x11/xlib connection (DISP, SCRN, ROOT, FOCU)...\n");
+   DEBUG_YXINIT  printf("x11/xlib connection (YX_DISP, YX_SCRN, ROOT, FOCU)...¦");
    /*---(connect)-------------------------------*/
-   DEBUG_YXINIT printf("   - xserver connection  . . . . .  (DISP) ");
-   DISP = XOpenDisplay(NULL);      /* pull the default                 */
-   if (DISP == NULL) {
+   DEBUG_YXINIT printf("   - xserver connection  . . . . .  (YX_DISP) ");
+   YX_DISP = XOpenDisplay(NULL);      /* pull the default                 */
+   if (YX_DISP == NULL) {
       DEBUG_YXINIT printf("NULL, EXITING\naborted\n");
       return -1;
    }
-   DEBUG_YXINIT printf("%p\n", (void *) DISP);
+   DEBUG_YXINIT printf("%p¦", (void *) YX_DISP);
    /*---(get the connection number)-------------*/
    DEBUG_YXINIT printf("   - connection number . . . . . . . . . . ");
-   DEBUG_YXINIT printf("%d\n", ConnectionNumber(DISP));
+   DEBUG_YXINIT printf("%d¦", ConnectionNumber(YX_DISP));
    /*---(get the vendor)------------------------*/
    DEBUG_YXINIT printf("   - server vendor . . . . . . . . . . . . ");
-   DEBUG_YXINIT printf("%s\n", ServerVendor(DISP));
+   DEBUG_YXINIT printf("%s¦", ServerVendor(YX_DISP));
    /*---(get the vendor release)----------------*/
    DEBUG_YXINIT printf("   - server vendor release . . . . . . . . ");
-   DEBUG_YXINIT printf("%d\n", VendorRelease(DISP));
+   DEBUG_YXINIT printf("%d¦", VendorRelease(YX_DISP));
    /*---(get the protocol version)--------------*/
    DEBUG_YXINIT printf("   - protocol version  . . . . . . . . . . ");
-   DEBUG_YXINIT printf("v%dr%d\n", ProtocolVersion(DISP), ProtocolRevision(DISP));
+   DEBUG_YXINIT printf("v%dr%d¦", ProtocolVersion(YX_DISP), ProtocolRevision(YX_DISP));
    /*---(show the display name)-----------------*/
    DEBUG_YXINIT printf("   - display name  . . . . . . . . . . . . ");
-   DEBUG_YXINIT printf("%s\n", DisplayString(DISP));
+   DEBUG_YXINIT printf("%s¦", DisplayString(YX_DISP));
    /*---(show the screen count)-----------------*/
    DEBUG_YXINIT printf("   - number of screens . . . . . . . . . . ");
-   DEBUG_YXINIT printf("%d\n", ScreenCount(DISP));
+   DEBUG_YXINIT printf("%d¦", ScreenCount(YX_DISP));
    /*---(show the current screen)---------------*/
-   DEBUG_YXINIT printf("   - CURRENT SCREEN  . . . . . . .  (SCRN) ");
-   SCRN = DefaultScreen(DISP);
-   DEBUG_YXINIT printf("%d\n", SCRN);
+   DEBUG_YXINIT printf("   - CURRENT SCREEN  . . . . . . .  (YX_SCRN) ");
+   YX_SCRN = DefaultScreen(YX_DISP);
+   DEBUG_YXINIT printf("%d¦", YX_SCRN);
    /*---(get the screen pointer)----------------*/
    DEBUG_YXINIT printf("   - screen pointer  . . . . . . . . . . . ");
-   SCRN_PTR    = DefaultScreenOfDisplay(DISP);
+   SCRN_PTR    = DefaultScreenOfDisplay(YX_DISP);
    DEBUG_YXINIT printf("%p\n", (void *) SCRN_PTR);
    /*---(show the size)-------------------------*/
    DEBUG_YXINIT printf("   - screen size . . . . . . . . . . . . . ");
-   DEBUG_YXINIT printf("%dw, %dh\n", DisplayWidth(DISP, SCRN), DisplayHeight(DISP, SCRN));
+   DEBUG_YXINIT printf("%dw, %dh¦", DisplayWidth(YX_DISP, YX_SCRN), DisplayHeight(YX_DISP, YX_SCRN));
    /*---(show the depth)------------------------*/
    DEBUG_YXINIT printf("   - screen depth  . . . . . . . . . . . . ");
-   DEBUG_YXINIT printf("%d\n", DefaultDepth(DISP, SCRN));
+   DEBUG_YXINIT printf("%d¦", DefaultDepth(YX_DISP, YX_SCRN));
    /*---(show the root window)------------------*/
    DEBUG_YXINIT printf("   - root window . . . . . . . . .  (ROOT) ");
-   ROOT      = RootWindow(DISP, SCRN);
+   ROOT      = RootWindow(YX_DISP, YX_SCRN);
    if (ROOT == 0) {
       DEBUG_YXINIT printf("NULL, EXITING\naborted\n");
       return -3;
@@ -179,14 +179,14 @@ yXINIT__xconnect()
    DEBUG_YXINIT printf("%ld\n", ROOT);
    /*---(show the colormap entries)-------------*/
    DEBUG_YXINIT printf("   - color map entries . . . . . . . . . . ");
-   DEBUG_YXINIT printf("%d\n", DisplayCells(DISP, SCRN));
+   DEBUG_YXINIT printf("%d¦", DisplayCells(YX_DISP, YX_SCRN));
    /*---(show the backing store)----------------*/
    DEBUG_YXINIT printf("   - backing store . . . . . . . . . . . . ");
    DEBUG_YXINIT printf("%d\n", DoesBackingStore(SCRN_PTR));
    /*---(current focus window)------------------*/
    DEBUG_YXINIT printf("   - focus window  . . . . . . . .  (FOCU) ");
    int trash;
-   XGetInputFocus(DISP, &FOCU, &trash);
+   XGetInputFocus(YX_DISP, &FOCU, &trash);
    if (FOCU == 0) {
       DEBUG_YXINIT printf("NULL, EXITING\naborted\n");
       return -4;
@@ -211,17 +211,17 @@ yXINIT__xsetup()
     * these drops of wisdom come from Tronche
     */
    /*---(start message)-------------------------*/
-   DEBUG_YXINIT printf("x11/xlib main window (CMAP, BASE, CON1, CON2)...\n");
+   DEBUG_YXINIT printf("x11/xlib main window (CMAP, YX_BASE, CON1, CON2)...¦");
    XSetWindowAttributes   attr;
    XColor         xc1, xc2;
    /*-------------------------------------------*/
    DEBUG_YXINIT printf("   - access default colormap . . .  (CMAP) ");
-   CMAP       = DefaultColormap(DISP, SCRN);
+   CMAP       = DefaultColormap(YX_DISP, YX_SCRN);
    attr.colormap  = CMAP;
    DEBUG_YXINIT printf("success\n");
    /*-------------------------------------------*/
    DEBUG_YXINIT printf("   - assign background color . . . . . . . ");
-   XAllocNamedColor(DISP, CMAP, "black"      ,  &xc1, &xc2);
+   XAllocNamedColor(YX_DISP, CMAP, "black"      ,  &xc1, &xc2);
    attr.background_pixel = xc1.pixel;
    DEBUG_YXINIT printf("success\n");
    /*-------------------------------------------*/
@@ -230,20 +230,20 @@ yXINIT__xsetup()
     *  depth, class, visual, valuemask, attributes
     */
    DEBUG_YXINIT printf("   - create base window  . . . . (my.base) ");
-   BASE = XCreateWindow(DISP, ROOT,
+   YX_BASE = XCreateWindow(YX_DISP, ROOT,
          0, 0, WIDTH, HEIGHT, 0,
          CopyFromParent, InputOutput, CopyFromParent,
          CWBackPixel|CWColormap, &attr);
-   if (BASE == 0) {
+   if (YX_BASE == 0) {
       DEBUG_YXINIT printf("NULL, EXITING\naborted\n");
       return -2;
    }
-   DEBUG_YXINIT printf("%ld\n", BASE);
+   DEBUG_YXINIT printf("%ld¦", YX_BASE);
    /*-------------------------------------------*
     * this is the proper way to change the window title
     */
    DEBUG_YXINIT printf("   - change the title  . . . . . . . . . . ");
-   XStoreName(DISP, BASE, TITLE);
+   XStoreName(YX_DISP, YX_BASE, TITLE);
    DEBUG_YXINIT printf("success\n");
    /*-------------------------------------------*
     * this section makes sure the petal window *NEVER* grabs the focus
@@ -252,7 +252,7 @@ yXINIT__xsetup()
    HINTS.flags  = InputHint;
    if (CAN_FOCUS == 'n')  HINTS.input  = 0;
    else                   HINTS.input  = 1;
-   XSetWMHints(DISP, BASE, &HINTS);
+   XSetWMHints(YX_DISP, YX_BASE, &HINTS);
    DEBUG_YXINIT printf("success\n");
    /*---(set the size hints)--------------------*/
    DEBUG_YXINIT printf("   - set the size hints  . . . . . . . . . ");
@@ -264,11 +264,11 @@ yXINIT__xsetup()
       hints.min_width  = hints.max_width  = hints.base_width  = WIDTH;
       hints.min_height = hints.max_height = hints.base_height = HEIGHT;
    }
-   XSetWMNormalHints(DISP, BASE, &hints);
+   XSetWMNormalHints(YX_DISP, YX_BASE, &hints);
    DEBUG_YXINIT printf("success\n");
    /*---(mask events)---------------------------*/
    DEBUG_YXINIT printf("   - update the full event mask  . . . . . ");
-   XSelectInput(DISP, BASE, KeyPressMask|KeyReleaseMask|ButtonPressMask|ButtonMotionMask|ButtonReleaseMask|ExposureMask|StructureNotifyMask|FocusChangeMask);
+   XSelectInput(YX_DISP, YX_BASE, KeyPressMask|KeyReleaseMask|ButtonPressMask|ButtonMotionMask|ButtonReleaseMask|ExposureMask|StructureNotifyMask|FocusChangeMask);
    /*  PointerMotionMask    -- movement regardless of button presses
     *  ButtonMotionMask     -- movement when a button is pressed
     *  Button<n>MotionMask  -- movement when button <n> is pressed
@@ -276,17 +276,17 @@ yXINIT__xsetup()
    DEBUG_YXINIT printf("success\n");
    /*--------------------------s----------------*/
    DEBUG_YXINIT printf("   - map the window  . . . . . . . . . . . ");
-   XMapWindow(DISP, BASE);  /* alternative is XMapRaised() */
+   XMapWindow(YX_DISP, YX_BASE);  /* alternative is XMapRaised() */
    DEBUG_YXINIT printf("success\n");
    /*-------------------------------ss----------*/
    DEBUG_YXINIT printf("   - flush the event queue . . . . . . . . ");
-   XFlush(DISP);
+   XFlush(YX_DISP);
    DEBUG_YXINIT printf("success\n");
    /*-------------------------------------------*/
    DEBUG_YXINIT printf("   - get the initial location  . . . . . . ");
    ulong       trash1;
    uint        trash2;
-   XGetGeometry(DISP, BASE, &trash1, &X, &Y, &WIDTH, &HEIGHT, &trash2, &trash2);
+   XGetGeometry(YX_DISP, YX_BASE, &trash1, &X, &Y, &WIDTH, &HEIGHT, &trash2, &trash2);
    DEBUG_YXINIT printf("%dx, %dy, %dw, %dh\n", X, Y, WIDTH, HEIGHT);
    /*---(complete)------------------------------*/
    DEBUG_YXINIT printf("   - done\n\n");
@@ -298,11 +298,11 @@ yXINIT__xdestroy()
 {
    DEBUG_YXINIT  printf("wrapping up of xwindows connection...\n");
    /*---(wipe window)---------------------------*/
-   XUnmapWindow   (DISP, BASE);
-   XDestroyWindow (DISP, BASE);
+   XUnmapWindow   (YX_DISP, YX_BASE);
+   XDestroyWindow (YX_DISP, YX_BASE);
    /*---(disconnect)----------------------------*/
    DEBUG_YXINIT  printf("   - closing connection  . . . . . . . . . ");
-   XCloseDisplay(DISP);
+   XCloseDisplay(YX_DISP);
    DEBUG_YXINIT  printf("success\n");
    /*---(complete)------------------------------*/
    DEBUG_YXINIT  printf("   - done\n\n");
@@ -324,11 +324,11 @@ yXINIT__gconnect()
    DEBUG_YXINIT  printf("opengl/glx connection (VISU)...\n");
    /*---(get glx version)-----------------------*/
    DEBUG_YXINIT  printf("   - glx version . . . . . . . . . . . . . ");
-   glXQueryVersion(DISP, &major, &minor);
+   glXQueryVersion(YX_DISP, &major, &minor);
    DEBUG_YXINIT  printf("v%dr%d\n", major, minor);
    /*---(setup visual)--------------------------*/
    DEBUG_YXINIT  printf("   - CREATE VISUALIZAION . . . . . .(VISU) ");
-   VISU = glXChooseVisual(DISP, 0, x_att);
+   VISU = glXChooseVisual(YX_DISP, 0, x_att);
    if (VISU == NULL) {
       DEBUG_YXINIT  printf("NULL, EXITING\naborted\n");
       return -1;
@@ -349,11 +349,11 @@ yXINIT__gsetup()
    DEBUG_YXINIT  printf("opengl/glx main window (GCON)...\n");
    /*---(context)-------------------------------*/
    DEBUG_YXINIT  printf("   - CREATE CONTEXT  . . . . . . . .(GCON) ");
-   GCON = glXCreateContext(DISP, VISU, NULL, GL_TRUE);
+   GCON = glXCreateContext(YX_DISP, VISU, NULL, GL_TRUE);
    DEBUG_YXINIT  printf("%p\n", (void *) GCON);
    /*---(make current)--------------------------*/
    DEBUG_YXINIT  printf("   - make current  . . . . . . . . . . . . ");
-   glXMakeCurrent(DISP, BASE, GCON);
+   glXMakeCurrent(YX_DISP, YX_BASE, GCON);
    DEBUG_YXINIT  printf("success\n");
    /*---(make current)--------------------------*/
    DEBUG_YXINIT  printf("   - enable depth calcs  . . . . . . . . . ");
@@ -390,7 +390,7 @@ yXINIT__gsetup()
    DEBUG_YXINIT  printf("success\n");
    /*---(check double buffer)-------------------*/
    DEBUG_YXINIT  printf("   - check double buffer . . . . . . . . . ");
-   if (glXIsDirect(DISP, GCON)) {
+   if (glXIsDirect(YX_DISP, GCON)) {
       DEBUG_YXINIT  printf("double\n");
    } else {
       DEBUG_YXINIT  printf("SINGLE\n");
@@ -403,7 +403,7 @@ yXINIT__gsetup()
 char
 yXINIT__gdestroy()
 {
-   glXDestroyContext(DISP, GCON);
+   glXDestroyContext(YX_DISP, GCON);
    return 0;
 }
 
@@ -416,13 +416,13 @@ yXINIT_focus       (void)
    char  *x_name;
    static    int x_runs  = 0;
    ++x_runs;
-   DEBUG_YXINIT printf("F> START xlib_focus() : root=%ld, base=%ld, run=%d\n", ROOT, BASE, x_runs);
-   XGetInputFocus (DISP, &x_focus, &x_waste);
+   DEBUG_YXINIT printf("F> START xlib_focus() : root=%ld, base=%ld, run=%d¦", ROOT, YX_BASE, x_runs);
+   XGetInputFocus (YX_DISP, &x_focus, &x_waste);
    DEBUG_YXINIT printf("F> FIND  xlib_focus() : focus window = %ld\n", FOCU);
    FOCU =  x_focus;
    strncpy (FOCU_NAME, "(null)", 100);
    if (FOCU != ROOT) {
-      XFetchName(DISP, FOCU, &x_name);
+      XFetchName(YX_DISP, FOCU, &x_name);
       if (x_name == NULL) strncpy(FOCU_NAME, "(found)", 100);  /* gimp, etc.  */
       else                strncpy(FOCU_NAME, x_name,  50);     /* 99% of apps */
    }
@@ -436,7 +436,7 @@ yXINIT_focus       (void)
  *>    Window x_focus;                                                                 <* 
  *>    x_focus = xlib_focus_find(0, 0, ROOT, ROOT);                                    <* 
  *>    x_focus = xlib_focus_find(0, 0, ROOT, ROOT);                                    <* 
- *>    XSetInputFocus(DISP, x_focus, RevertToParent, CurrentTime);                     <* 
+ *>    XSetInputFocus(YX_DISP, x_focus, RevertToParent, CurrentTime);                     <* 
  *>    if (debug_xlib_foc) printf("   > KEY REQUEST -- focus window = %ld\n", FOCU);   <* 
  *>    FOCU =  x_focus;                                                                <* 
  *>    return FOCU;                                                                    <* 
@@ -463,17 +463,17 @@ yXINIT_focus       (void)
  *>    /+---(process the window)------------------------------+/                                                      <* 
  *>    if (debug_xlib_foc) {                                                                                          <* 
  *>       if (a_top == my.focu)      printf(" FOCUS ");                                                               <* 
- *>       else if (a_top == my.base) printf(" BASE  ");                                                               <* 
+ *>       else if (a_top == my.base) printf(" YX_BASE  ");                                                               <* 
  *>       else if (a_top == my.root) printf(" ROOT  ");                                                               <* 
  *>       else                       printf("       ");                                                               <* 
  *>       for (j = 0; j < a_level; ++j) printf("   ");                                                                <* 
  *>    }                                                                                                              <* 
  *>    /+---(look for children)-------------------------------+/                                                      <* 
- *>    XQueryTree(DISP, a_top, &dummy, &dummy, &children, &nchildren);                                                <* 
+ *>    XQueryTree(YX_DISP, a_top, &dummy, &dummy, &children, &nchildren);                                                <* 
  *>    if (debug_xlib_foc) printf("%2d) %-10ld with %-2d children", a_order, a_top, nchildren);                       <* 
  *>    /+---(check the state)---------------------------------+/                                                      <* 
- *>    wm_state = XInternAtom(DISP, "WM_STATE", 1);                                                                   <* 
- *>    XGetWindowProperty(DISP, a_top, wm_state, 0, 0, 0, AnyPropertyType, &type, &format, &nitems, &after, &data);   <* 
+ *>    wm_state = XInternAtom(YX_DISP, "WM_STATE", 1);                                                                   <* 
+ *>    XGetWindowProperty(YX_DISP, a_top, wm_state, 0, 0, 0, AnyPropertyType, &type, &format, &nitems, &after, &data);   <* 
  *>    /+---(find the last before me)-------------------------+/                                                      <* 
  *>    if (type == wm_state) {                                                                                        <* 
  *>       if (a_top != my.base) x_focus = a_top;                                                                      <* 

@@ -7,7 +7,15 @@
 
 
 
+#include <X11/X.h>                   /* main header                           */
+#include <X11/Xlib.h>                /* c-api (xlib) header                   */
 
+
+
+Display       *YX_DISP;
+int            YX_SCRN;
+Window         YX_BASE;
+XEvent         YX_EVNT;
 
 #define    YX_FOCUSABLE   'y'
 #define    YX_HIDDEN      'n'

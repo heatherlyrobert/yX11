@@ -28,8 +28,8 @@
 
 #define     P_VERMAJOR  "1.--  working for everyday use, evolving but stable"
 #define     P_VERMINOR  "1.0-  production fixes and small enhancements"
-#define     P_VERNUM    "1.0f"
-#define     P_VERTXT    "small fixes after adding the private header"
+#define     P_VERNUM    "1.0g"
+#define     P_VERTXT    "had to make a few more things public for yVIKEYS and metis"
 
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -93,8 +93,6 @@
 
 
 /*===[[ XLIB HEADERS ]]=======================================================*/
-#include <X11/X.h>                   /* main header                           */
-#include <X11/Xlib.h>                /* c-api (xlib) header                   */
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>               /* for setting up new protocol messages  */
 #include <X11/keysym.h>              /* for resolving keycodes/keysyms        */
@@ -123,8 +121,8 @@ typedef    unsigned char uchar;
 struct cXINIT   {
    char           name[300];
    /*---(from xlib_connect)------------*/
-   Display       *disp;
-   int            scrn;
+   /*> Display       *disp;                                                           <*/
+   /*> int            scrn;                                                           <*/
    Screen        *scrn_ptr;
    Window         root;  /* Window = unsigned long  */
    Window         focu;
@@ -135,7 +133,7 @@ struct cXINIT   {
    XVisualInfo   *visu;
    /*---(from xlib_setup)--------------*/
    Colormap       cmap;
-   Window         base;
+   /*> Window         base;                                                           <*/
    GC             con1;
    GC             con2;
    XWMHints       wmhints;
@@ -158,8 +156,8 @@ extern  tXINIT  gXINIT;
 #define    VERBOSE         gXINIT.verbose
 #define    DEBUG_YXINIT    if (VERBOSE == 'y')
 
-#define    DISP       gXINIT.disp
-#define    SCRN       gXINIT.scrn
+/*> #define    DISP       gXINIT.disp                                                 <*/
+/*> #define    SCRN       gXINIT.scrn                                                 <*/
 #define    SCRN_PTR   gXINIT.scrn_ptr
 #define    ROOT       gXINIT.root
 #define    FOCU       gXINIT.focu
@@ -168,8 +166,8 @@ extern  tXINIT  gXINIT;
 #define    CAN_SIZE   gXINIT.resizeable
 #define    VISU       gXINIT.visu
 #define    CMAP       gXINIT.cmap
-#define    BASE       gXINIT.base
-#define    EVNT       gXINIT.evnt
+/*> #define    BASE       gXINIT.base                                                 <*/
+/*> #define    EVNT       gXINIT.evnt                                                 <*/
 #define    SKEY       gXINIT.skey
 #define    GCON       gXINIT.gcon
 #define    HINTS      gXINIT.wmhints
