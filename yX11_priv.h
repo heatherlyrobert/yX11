@@ -28,8 +28,8 @@
 
 #define     P_VERMAJOR  "1.--  working for everyday use, evolving but stable"
 #define     P_VERMINOR  "1.0-  production fixes and small enhancements"
-#define     P_VERNUM    "1.0g"
-#define     P_VERTXT    "had to make a few more things public for yVIKEYS and metis"
+#define     P_VERNUM    "1.0h"
+#define     P_VERTXT    "exposed a few more values to support petal writing program"
 
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -124,7 +124,6 @@ struct cXINIT   {
    /*> Display       *disp;                                                           <*/
    /*> int            scrn;                                                           <*/
    Screen        *scrn_ptr;
-   Window         root;  /* Window = unsigned long  */
    Window         focu;
    char           focu_name[300];
    char           focusable;
@@ -156,19 +155,13 @@ extern  tXINIT  gXINIT;
 #define    VERBOSE         gXINIT.verbose
 #define    DEBUG_YXINIT    if (VERBOSE == 'y')
 
-/*> #define    DISP       gXINIT.disp                                                 <*/
-/*> #define    SCRN       gXINIT.scrn                                                 <*/
 #define    SCRN_PTR   gXINIT.scrn_ptr
-#define    ROOT       gXINIT.root
 #define    FOCU       gXINIT.focu
 #define    FOCU_NAME  gXINIT.focu_name
 #define    CAN_FOCUS  gXINIT.focusable
 #define    CAN_SIZE   gXINIT.resizeable
 #define    VISU       gXINIT.visu
 #define    CMAP       gXINIT.cmap
-/*> #define    BASE       gXINIT.base                                                 <*/
-/*> #define    EVNT       gXINIT.evnt                                                 <*/
-#define    SKEY       gXINIT.skey
 #define    GCON       gXINIT.gcon
 #define    HINTS      gXINIT.wmhints
 

@@ -128,7 +128,7 @@ yX11__xerror       (Display *a_disp, XErrorEvent *a_event)
 char
 yXINIT__xconnect()
 {
-   DEBUG_YXINIT  printf("x11/xlib connection (YX_DISP, YX_SCRN, ROOT, FOCU)...¦");
+   DEBUG_YXINIT  printf("x11/xlib connection (YX_DISP, YX_SCRN, YX_ROOT, FOCU)...¦");
    /*---(connect)-------------------------------*/
    DEBUG_YXINIT printf("   - xserver connection  . . . . .  (YX_DISP) ");
    YX_DISP = XOpenDisplay(NULL);      /* pull the default                 */
@@ -170,13 +170,13 @@ yXINIT__xconnect()
    DEBUG_YXINIT printf("   - screen depth  . . . . . . . . . . . . ");
    DEBUG_YXINIT printf("%d¦", DefaultDepth(YX_DISP, YX_SCRN));
    /*---(show the root window)------------------*/
-   DEBUG_YXINIT printf("   - root window . . . . . . . . .  (ROOT) ");
-   ROOT      = RootWindow(YX_DISP, YX_SCRN);
-   if (ROOT == 0) {
+   DEBUG_YXINIT printf("   - root window . . . . . . .   (YX_ROOT) ");
+   YX_ROOT   = RootWindow(YX_DISP, YX_SCRN);
+   if (YX_ROOT == 0) {
       DEBUG_YXINIT printf("NULL, EXITING\naborted\n");
       return -3;
    }
-   DEBUG_YXINIT printf("%ld\n", ROOT);
+   DEBUG_YXINIT printf("%ld\n", YX_ROOT);
    /*---(show the colormap entries)-------------*/
    DEBUG_YXINIT printf("   - color map entries . . . . . . . . . . ");
    DEBUG_YXINIT printf("%d¦", DisplayCells(YX_DISP, YX_SCRN));
@@ -230,7 +230,7 @@ yXINIT__xsetup()
     *  depth, class, visual, valuemask, attributes
     */
    DEBUG_YXINIT printf("   - create base window  . . . . (my.base) ");
-   YX_BASE = XCreateWindow(YX_DISP, ROOT,
+   YX_BASE = XCreateWindow(YX_DISP, YX_ROOT,
          0, 0, WIDTH, HEIGHT, 0,
          CopyFromParent, InputOutput, CopyFromParent,
          CWBackPixel|CWColormap, &attr);
@@ -416,12 +416,12 @@ yXINIT_focus       (void)
    char  *x_name;
    static    int x_runs  = 0;
    ++x_runs;
-   DEBUG_YXINIT printf("F> START xlib_focus() : root=%ld, base=%ld, run=%d¦", ROOT, YX_BASE, x_runs);
+   DEBUG_YXINIT printf("F> START xlib_focus() : root=%ld, base=%ld, run=%d¦", YX_ROOT, YX_BASE, x_runs);
    XGetInputFocus (YX_DISP, &x_focus, &x_waste);
    DEBUG_YXINIT printf("F> FIND  xlib_focus() : focus window = %ld\n", FOCU);
    FOCU =  x_focus;
    strncpy (FOCU_NAME, "(null)", 100);
-   if (FOCU != ROOT) {
+   if (FOCU != YX_ROOT) {
       XFetchName(YX_DISP, FOCU, &x_name);
       if (x_name == NULL) strncpy(FOCU_NAME, "(found)", 100);  /* gimp, etc.  */
       else                strncpy(FOCU_NAME, x_name,  50);     /* 99% of apps */
@@ -434,8 +434,8 @@ yXINIT_focus       (void)
  *> xlib_focus(void)                                                                   <* 
  *> {                                                                                  <* 
  *>    Window x_focus;                                                                 <* 
- *>    x_focus = xlib_focus_find(0, 0, ROOT, ROOT);                                    <* 
- *>    x_focus = xlib_focus_find(0, 0, ROOT, ROOT);                                    <* 
+ *>    x_focus = xlib_focus_find(0, 0, YX_ROOT, YX_ROOT);                                    <* 
+ *>    x_focus = xlib_focus_find(0, 0, YX_ROOT, YX_ROOT);                                    <* 
  *>    XSetInputFocus(YX_DISP, x_focus, RevertToParent, CurrentTime);                     <* 
  *>    if (debug_xlib_foc) printf("   > KEY REQUEST -- focus window = %ld\n", FOCU);   <* 
  *>    FOCU =  x_focus;                                                                <* 
@@ -464,7 +464,7 @@ yXINIT_focus       (void)
  *>    if (debug_xlib_foc) {                                                                                          <* 
  *>       if (a_top == my.focu)      printf(" FOCUS ");                                                               <* 
  *>       else if (a_top == my.base) printf(" YX_BASE  ");                                                               <* 
- *>       else if (a_top == my.root) printf(" ROOT  ");                                                               <* 
+ *>       else if (a_top == my.root) printf(" YX_ROOT  ");                                                               <* 
  *>       else                       printf("       ");                                                               <* 
  *>       for (j = 0; j < a_level; ++j) printf("   ");                                                                <* 
  *>    }                                                                                                              <* 

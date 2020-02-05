@@ -15,7 +15,9 @@
 Display       *YX_DISP;
 int            YX_SCRN;
 Window         YX_BASE;
+Window         YX_ROOT;
 XEvent         YX_EVNT;
+XKeyEvent      YX_SKEY;
 
 #define    YX_FOCUSABLE   'y'
 #define    YX_HIDDEN      'n'
