@@ -27,9 +27,9 @@
 #define     P_DEPENDS   "xlib/glx"
 
 #define     P_VERMAJOR  "1.--  working for everyday use, evolving but stable"
-#define     P_VERMINOR  "1.0-  production fixes and small enhancements"
-#define     P_VERNUM    "1.0h"
-#define     P_VERTXT    "exposed a few more values to support petal writing program"
+#define     P_VERMINOR  "1.1-  adding desktop control for zeus and scripting"
+#define     P_VERNUM    "1.1a"
+#define     P_VERTXT    "inventories desktops and windows, unit tested"
 
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -93,12 +93,13 @@
 
 
 /*===[[ XLIB HEADERS ]]=======================================================*/
-#include <X11/Xutil.h>
-#include <X11/Xatom.h>               /* for setting up new protocol messages  */
-#include <X11/keysym.h>              /* for resolving keycodes/keysyms        */
-#include <string.h>
-#include <stdlib.h>
-#include <memory.h>       /* malloc()                                         */
+#include    <X11/Xutil.h>
+#include    <X11/Xatom.h>               /* for setting up new protocol messages  */
+#include    <X11/keysym.h>              /* for resolving keycodes/keysyms        */
+#include    <stdio.h>        /* C_ANSI : strcpy, strlen, strchr, strcmp, ...  */
+#include    <string.h>       /* C_ANSI : printf, snprintf, fgets, fopen, ...  */
+#include    <stdlib.h>       /* C_ANSI : exit                                 */
+#include    <memory.h>       /* malloc()                                         */
 
 
 /*===[[ GLX HEADERS ]]========================================================*/
@@ -107,8 +108,10 @@
 
 
 /*===[[ CLIB HEADERS ]]=======================================================*/
-#include <stdio.h>
 
+#include    <ySTR.h>
+#include    <yURG.h>                    /* heatherly program logger            */
+#include    <yLOG.h>                    /* heatherly program logger            */
 
 
 /*===[[ TYPEDEFS ]]===========================================================*/
@@ -116,6 +119,7 @@ typedef    unsigned long ulong;
 typedef    unsigned int  uint;
 typedef    unsigned char uchar;
 
+extern char   unit_answer [LEN_RECD];
 
 /*===[[ GLOBALS ]]============================================================*/
 struct cXINIT   {
@@ -156,7 +160,6 @@ extern  tXINIT  gXINIT;
 #define    DEBUG_YXINIT    if (VERBOSE == 'y')
 
 #define    SCRN_PTR   gXINIT.scrn_ptr
-#define    FOCU       gXINIT.focu
 #define    FOCU_NAME  gXINIT.focu_name
 #define    CAN_FOCUS  gXINIT.focusable
 #define    CAN_SIZE   gXINIT.resizeable
@@ -173,6 +176,15 @@ extern  tXINIT  gXINIT;
 
 
 
+/*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
+char        yX11__unit_quiet        (void);
+char        yX11__unit_loud         (void);
+char        yX11__unit_end          (void);
+
+
+char        yX11_desk__desktops     (char a_real);
+char        yX11_desk__windows      (char a_real);
+char*       yX11__unit_desk         (char *a_question, int a_num);
 
 
 

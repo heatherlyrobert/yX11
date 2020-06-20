@@ -186,12 +186,12 @@ yXINIT__xconnect()
    /*---(current focus window)------------------*/
    DEBUG_YXINIT printf("   - focus window  . . . . . . . .  (FOCU) ");
    int trash;
-   XGetInputFocus(YX_DISP, &FOCU, &trash);
-   if (FOCU == 0) {
+   XGetInputFocus(YX_DISP, &YX_FOCU, &trash);
+   if (YX_FOCU == 0) {
       DEBUG_YXINIT printf("NULL, EXITING\naborted\n");
       return -4;
    }
-   DEBUG_YXINIT printf("%ld\n", FOCU);
+   DEBUG_YXINIT printf("%ld\n", YX_FOCU);
    /*-------------------------------------------*/
    DEBUG_YXINIT printf("   - setup error handler . . . . . . . . . ");
    XSetErrorHandler(yX11__xerror);
@@ -418,16 +418,16 @@ yXINIT_focus       (void)
    ++x_runs;
    DEBUG_YXINIT printf("F> START xlib_focus() : root=%ld, base=%ld, run=%d¦", YX_ROOT, YX_BASE, x_runs);
    XGetInputFocus (YX_DISP, &x_focus, &x_waste);
-   DEBUG_YXINIT printf("F> FIND  xlib_focus() : focus window = %ld\n", FOCU);
-   FOCU =  x_focus;
+   DEBUG_YXINIT printf("F> FIND  xlib_focus() : focus window = %ld\n", YX_FOCU);
+   YX_FOCU =  x_focus;
    strncpy (FOCU_NAME, "(null)", 100);
-   if (FOCU != YX_ROOT) {
-      XFetchName(YX_DISP, FOCU, &x_name);
+   if (YX_FOCU != YX_ROOT) {
+      XFetchName(YX_DISP, YX_FOCU, &x_name);
       if (x_name == NULL) strncpy(FOCU_NAME, "(found)", 100);  /* gimp, etc.  */
       else                strncpy(FOCU_NAME, x_name,  50);     /* 99% of apps */
    }
    DEBUG_YXINIT printf("F> NAME <<%s>>\n", FOCU_NAME);
-   return FOCU;
+   return YX_FOCU;
 }
 
 /*> ulong                                                                              <* 
@@ -437,9 +437,9 @@ yXINIT_focus       (void)
  *>    x_focus = xlib_focus_find(0, 0, YX_ROOT, YX_ROOT);                                    <* 
  *>    x_focus = xlib_focus_find(0, 0, YX_ROOT, YX_ROOT);                                    <* 
  *>    XSetInputFocus(YX_DISP, x_focus, RevertToParent, CurrentTime);                     <* 
- *>    if (debug_xlib_foc) printf("   > KEY REQUEST -- focus window = %ld\n", FOCU);   <* 
- *>    FOCU =  x_focus;                                                                <* 
- *>    return FOCU;                                                                    <* 
+ *>    if (debug_xlib_foc) printf("   > KEY REQUEST -- focus window = %ld\n", YX_FOCU);   <* 
+ *>    YX_FOCU =  x_focus;                                                                <* 
+ *>    return YX_FOCU;                                                                    <* 
  *> }                                                                                  <*/
 
 
@@ -486,4 +486,38 @@ yXINIT_focus       (void)
  *>    if (a_level == 0 && x_focus == 0) return my.root;                                                              <* 
  *>    else                              return x_focus;                                                              <* 
  *> }                                                                                                                 <*/
+
+
+
+/*====================------------------------------------====================*/
+/*===----                    unit testing accessor                     ----===*/
+/*====================------------------------------------====================*/
+static void      o___UNITTEST________________o (void) {;}
+
+char   unit_answer [LEN_RECD];
+
+char       /*----: set up program urgents/debugging --------------------------*/
+yX11__unit_quiet   (void)
+{
+   yLOGS_begin ("yX11" , YLOG_SYS, YLOG_QUIET);
+   return 0;
+}
+
+char       /*----: set up program urgents/debugging --------------------------*/
+yX11__unit_loud    (void)
+{
+   yLOGS_begin ("yX11" , YLOG_SYS, YLOG_NOISE);
+   yURG_name  ("kitchen"      , YURG_ON);
+   yURG_name  ("desk"         , YURG_ON);
+   yURG_name  ("ystr"         , YURG_ON);
+   DEBUG_DESK   yLOG_info     ("yX11"    , yX11_version   ());
+   return 0;
+}
+
+char       /*----: stop logging ----------------------------------------------*/
+yX11__unit_end     (void)
+{
+   yLOGS_end     ();
+   return 0;
+}
 
