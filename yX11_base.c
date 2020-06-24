@@ -1,13 +1,6 @@
 #include "yX11.h"
 #include "yX11_priv.h"
 
-char       yXINIT__xconnect        (void);
-char       yXINIT__xsetup          (void);
-char       yXINIT__xdestroy        (void);
-char       yXINIT__gconnect        (void);
-char       yXINIT__gsetup          (void);
-char       yXINIT__gdestroy        (void);
-int        yX11__xerror            (Display *a_disp, XErrorEvent *a_event);
 
 #define   DEBUG      if (gXINIT.verbose) 
 
@@ -45,6 +38,17 @@ yX11_version       (void)
 
 
 char
+yx11_base_defense       (void)
+{
+   if (YX_DISP == NULL)   return -1;
+   return 0;
+}
+
+
+
+
+
+char
 yX11_start (
       char     *a_name,                /* main window name                    */
       int       a_width,               /* window width                        */
@@ -72,10 +76,13 @@ yX11_start (
    DEBUG_YXINIT printf("%c\n", CAN_FOCUS);
    /*---(reset summary counters)-------*/
    DEBUG_YXINIT printf("   - start executing setup functions\n\n");
-   yXINIT__xconnect();
-   yXINIT__gconnect();
-   yXINIT__xsetup();
-   yXINIT__gsetup();
+   yX11_base__connect   ();
+   yX11_opengl__connect ();
+   yX11_base__create    ();
+   yX11_opengl__create  ();
+   yx11_desk_init       ();
+   yx11_win_init        ();
+   yx11_loc_init        ();
    DEBUG_YXINIT printf("yXINIT -- heatherly xlib/glx setup -------------------------------------------- (end)\n\n");
    /*---(complete)-------------------------*/
    return 0;
@@ -113,20 +120,20 @@ char
 yX11_end             (void)
 {
    DEBUG_YXINIT printf("\nyXINIT -- heatherly xlib/glx destroy ---------------------------------------- (start)\n\n");
-   yXINIT__gdestroy();
-   yXINIT__xdestroy();
+   yX11_opengl__destroy();
+   yX11_base__destroy();
    DEBUG_YXINIT printf("yXINIT -- heatherly xlib/glx setup -------------------------------------------- (end)\n\n");
    return 0;
 }
 
 int
-yX11__xerror       (Display *a_disp, XErrorEvent *a_event)
+yX11__error       (Display *a_disp, XErrorEvent *a_event)
 {
    return 0;
 }
 
 char
-yXINIT__xconnect()
+yX11_base__connect        (void)
 {
    DEBUG_YXINIT  printf("x11/xlib connection (YX_DISP, YX_SCRN, YX_ROOT, FOCU)...¦");
    /*---(connect)-------------------------------*/
@@ -179,10 +186,10 @@ yXINIT__xconnect()
    DEBUG_YXINIT printf("%ld\n", YX_ROOT);
    /*---(show the colormap entries)-------------*/
    DEBUG_YXINIT printf("   - color map entries . . . . . . . . . . ");
-   DEBUG_YXINIT printf("%d¦", DisplayCells(YX_DISP, YX_SCRN));
+   DEBUG_YXINIT printf("%d¦", DisplayCells (YX_DISP, YX_SCRN));
    /*---(show the backing store)----------------*/
    DEBUG_YXINIT printf("   - backing store . . . . . . . . . . . . ");
-   DEBUG_YXINIT printf("%d\n", DoesBackingStore(SCRN_PTR));
+   DEBUG_YXINIT printf("%d\n", DoesBackingStore (SCRN_PTR));
    /*---(current focus window)------------------*/
    DEBUG_YXINIT printf("   - focus window  . . . . . . . .  (FOCU) ");
    int trash;
@@ -194,15 +201,15 @@ yXINIT__xconnect()
    DEBUG_YXINIT printf("%ld\n", YX_FOCU);
    /*-------------------------------------------*/
    DEBUG_YXINIT printf("   - setup error handler . . . . . . . . . ");
-   XSetErrorHandler(yX11__xerror);
-   DEBUG_YXINIT printf("success\n");
+   XSetErrorHandler (yX11__error);
+   DEBUG_YXINIT printf ("success\n");
    /*---(complete)------------------------------*/
    DEBUG_YXINIT printf("   - done\n\n");
    return 0;
 }
 
 char
-yXINIT__xsetup()
+yX11_base__create        (void)
 {
    /*---(assumptions)---------------------------*/
    /* only options are to set the width, height, title, and focusable
@@ -210,6 +217,8 @@ yXINIT__xsetup()
     * - set standard window properties before mapping
     * these drops of wisdom come from Tronche
     */
+   /*---(defense)-------------------------------*/
+   if (yx11_base_defense () < 0)  return -1;
    /*---(start message)-------------------------*/
    DEBUG_YXINIT printf("x11/xlib main window (CMAP, YX_BASE, CON1, CON2)...¦");
    XSetWindowAttributes   attr;
@@ -294,9 +303,11 @@ yXINIT__xsetup()
 }
 
 char
-yXINIT__xdestroy()
+yX11_base__destroy      (void)
 {
    DEBUG_YXINIT  printf("wrapping up of xwindows connection...\n");
+   /*---(defense)-------------------------------*/
+   if (yx11_base_defense () < 0)  return -1;
    /*---(wipe window)---------------------------*/
    XUnmapWindow   (YX_DISP, YX_BASE);
    XDestroyWindow (YX_DISP, YX_BASE);
@@ -310,111 +321,15 @@ yXINIT__xdestroy()
 }
 
 
-
-/* establish the glx connection ----------------------------------------------*
- *    0 = success
- *   -1 = glxchoosevisual failed
- */
-char
-yXINIT__gconnect()
-{
-   /*> GLint       x_att[] = {GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None};   <*/
-   GLint       x_att[] = {GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None};
-   int         major, minor;
-   DEBUG_YXINIT  printf("opengl/glx connection (VISU)...\n");
-   /*---(get glx version)-----------------------*/
-   DEBUG_YXINIT  printf("   - glx version . . . . . . . . . . . . . ");
-   glXQueryVersion(YX_DISP, &major, &minor);
-   DEBUG_YXINIT  printf("v%dr%d\n", major, minor);
-   /*---(setup visual)--------------------------*/
-   DEBUG_YXINIT  printf("   - CREATE VISUALIZAION . . . . . .(VISU) ");
-   VISU = glXChooseVisual(YX_DISP, 0, x_att);
-   if (VISU == NULL) {
-      DEBUG_YXINIT  printf("NULL, EXITING\naborted\n");
-      return -1;
-   }
-   DEBUG_YXINIT  printf("%p\n", (void *) VISU);
-   /*---(complete)------------------------------*/
-   DEBUG_YXINIT  printf("   - done\n\n");
-   return 0;
-}
-
-
-/* update the base window with opengl settings -------------------------------*
- *    0 = success
- */
-char
-yXINIT__gsetup()
-{
-   DEBUG_YXINIT  printf("opengl/glx main window (GCON)...\n");
-   /*---(context)-------------------------------*/
-   DEBUG_YXINIT  printf("   - CREATE CONTEXT  . . . . . . . .(GCON) ");
-   GCON = glXCreateContext(YX_DISP, VISU, NULL, GL_TRUE);
-   DEBUG_YXINIT  printf("%p\n", (void *) GCON);
-   /*---(make current)--------------------------*/
-   DEBUG_YXINIT  printf("   - make current  . . . . . . . . . . . . ");
-   glXMakeCurrent(YX_DISP, YX_BASE, GCON);
-   DEBUG_YXINIT  printf("success\n");
-   /*---(make current)--------------------------*/
-   DEBUG_YXINIT  printf("   - enable depth calcs  . . . . . . . . . ");
-   glEnable(GL_DEPTH_TEST);
-   DEBUG_YXINIT  printf("success\n");
-   /*---(make current)--------------------------*/
-   DEBUG_YXINIT  printf("   - enable LE depth calc  . . . . . . . . ");
-   glDepthFunc(GL_LEQUAL);
-   DEBUG_YXINIT  printf("success\n");
-   /*---(make current)--------------------------*/
-   DEBUG_YXINIT  printf("   - enable flat shading . . . . . . . . . ");
-   glEnable(GL_FLAT);
-   DEBUG_YXINIT  printf("success\n");
-   /*-------------------------------------------*/
-   DEBUG_YXINIT printf("   - smoothing hints . . . . . . . . . . . ");
-   glEnable(GL_POINT_SMOOTH);
-   glEnable(GL_LINE_SMOOTH);
-   /*> glEnable(GL_POLYGON_SMOOTH);                                                   <*/
-   DEBUG_YXINIT printf("success\n");
-   /*-------------------------------------------*/
-   DEBUG_YXINIT printf("   - blending hints  . . . . . . . . . . . ");
-   glEnable(GL_BLEND);
-   glBlendFunc(GL_SRC_ALPHA,  GL_ONE_MINUS_SRC_ALPHA);
-   DEBUG_YXINIT printf("success\n");
-   /*-------------------------------------------*/
-   DEBUG_YXINIT printf("   - antialiasing hints  . . . . . . . . . ");
-   glHint(GL_POINT_SMOOTH_HINT,   GL_NICEST);
-   glHint(GL_LINE_SMOOTH_HINT,    GL_NICEST);
-   glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-   DEBUG_YXINIT printf("success\n");
-   /*---(make current)--------------------------*/
-   DEBUG_YXINIT  printf("   - perspective hints . . . . . . . . . . ");
-   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-   DEBUG_YXINIT  printf("success\n");
-   /*---(check double buffer)-------------------*/
-   DEBUG_YXINIT  printf("   - check double buffer . . . . . . . . . ");
-   if (glXIsDirect(YX_DISP, GCON)) {
-      DEBUG_YXINIT  printf("double\n");
-   } else {
-      DEBUG_YXINIT  printf("SINGLE\n");
-   }
-   /*---(complete)------------------------------*/
-   DEBUG_YXINIT  printf("   - done\n\n");
-   return 0;
-}
-
-char
-yXINIT__gdestroy()
-{
-   glXDestroyContext(YX_DISP, GCON);
-   return 0;
-}
-
-
 ulong            /* [------] find the currrently focused window -----------------------------*/
-yXINIT_focus       (void)
+yX11_focus            (void)
 {
    Window x_focus;
    int    x_waste;
    char  *x_name;
    static    int x_runs  = 0;
+   /*---(defense)-------------------------------*/
+   if (yx11_base_defense () < 0)  return -1;
    ++x_runs;
    DEBUG_YXINIT printf("F> START xlib_focus() : root=%ld, base=%ld, run=%d¦", YX_ROOT, YX_BASE, x_runs);
    XGetInputFocus (YX_DISP, &x_focus, &x_waste);
@@ -500,6 +415,10 @@ char       /*----: set up program urgents/debugging --------------------------*/
 yX11__unit_quiet   (void)
 {
    yLOGS_begin ("yX11" , YLOG_SYS, YLOG_QUIET);
+   yx11_desk_init ();
+   yx11_win_init  ();
+   yx11_loc_init        ();
+   yx11_full_refresh  ('y');
    return 0;
 }
 
@@ -511,6 +430,10 @@ yX11__unit_loud    (void)
    yURG_name  ("desk"         , YURG_ON);
    yURG_name  ("ystr"         , YURG_ON);
    DEBUG_DESK   yLOG_info     ("yX11"    , yX11_version   ());
+   yx11_desk_init ();
+   yx11_win_init  ();
+   yx11_loc_init        ();
+   yx11_full_refresh  ('y');
    return 0;
 }
 

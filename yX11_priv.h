@@ -28,8 +28,8 @@
 
 #define     P_VERMAJOR  "1.--  working for everyday use, evolving but stable"
 #define     P_VERMINOR  "1.1-  adding desktop control for zeus and scripting"
-#define     P_VERNUM    "1.1a"
-#define     P_VERTXT    "inventories desktops and windows, unit tested"
+#define     P_VERNUM    "1.1b"
+#define     P_VERTXT    "terminal creation and window placement working and unit tested"
 
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -96,10 +96,14 @@
 #include    <X11/Xutil.h>
 #include    <X11/Xatom.h>               /* for setting up new protocol messages  */
 #include    <X11/keysym.h>              /* for resolving keycodes/keysyms        */
+
+
+/*===[[ STANDARD ]]===========================================================*/
 #include    <stdio.h>        /* C_ANSI : strcpy, strlen, strchr, strcmp, ...  */
 #include    <string.h>       /* C_ANSI : printf, snprintf, fgets, fopen, ...  */
 #include    <stdlib.h>       /* C_ANSI : exit                                 */
-#include    <memory.h>       /* malloc()                                         */
+#include    <memory.h>       /* C_ANSI : malloc                               */
+#include    <sys/time.h>     /* C_UNIX : gettimeofday                         */
 
 
 /*===[[ GLX HEADERS ]]========================================================*/
@@ -108,10 +112,10 @@
 
 
 /*===[[ CLIB HEADERS ]]=======================================================*/
-
-#include    <ySTR.h>
-#include    <yURG.h>                    /* heatherly program logger            */
-#include    <yLOG.h>                    /* heatherly program logger            */
+#include    <yURG.h>         /* CUSTOM : heatherly urgent processing          */
+#include    <yLOG.h>         /* CUSTOM : heatherly program logging            */
+#include    <ySTR.h>         /* CUSTOM : heatherly string handling            */
+#include    <yREGEX.h>       /* CUSTOM : heatherly regular expressions        */
 
 
 /*===[[ TYPEDEFS ]]===========================================================*/
@@ -153,6 +157,8 @@ struct cXINIT   {
 typedef struct cXINIT tXINIT;
 extern  tXINIT  gXINIT;
 
+extern  int   s_ndesk;
+extern  int   s_nwin;
 
 
 /*===[[ DATA MACROS ]]========================================================*/
@@ -177,15 +183,51 @@ extern  tXINIT  gXINIT;
 
 
 /*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
+char        yx11_base_defense       (void);
+char        yX11_base__connect      (void);
+char        yX11_base__create       (void);
+char        yX11_base__destroy      (void);
+
+char        yX11_opengl__connect    (void);
+char        yX11_opengl__create     (void);
+char        yX11_opengl__destroy    (void);
+
+int         yX11__error             (Display *a_disp, XErrorEvent *a_event);
+
+
+/*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
 char        yX11__unit_quiet        (void);
 char        yX11__unit_loud         (void);
 char        yX11__unit_end          (void);
 
+/*---(counters)-------------*/
+char        yx11_desk_addwin        (char a_desk);
+char        yx11_desk_subwin        (char a_desk);
+/*---(program)--------------*/
+char        yx11_desk_purge         (void);
+char        yx11_desk_init          (void);
+/*---(inventory)------------*/
+char        yx11_desk_inventory     (char a_real);
+char        yx11_full_refresh       (char a_real);
 
-char        yX11_desk__desktops     (char a_real);
-char        yX11_desk__windows      (char a_real);
 char*       yX11__unit_desk         (char *a_question, int a_num);
 
+
+
+/*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
+/*---(program)--------------*/
+char        yx11_win_purge          (void);
+char        yx11_win_short_purge    (void);
+char        yx11_win_init           (void);
+/*---(inventory)------------*/
+char        yx11_win_inventory      (char a_real);
+char        yx11_win_current        (char a_real);
+
+
+
+char        yx11_loc_init           (void);
+char        yx11_loc_sizing         (char a_abbr, char a_scrn, int *a_left, int *a_topp, int *a_wide, int *a_tall);
+char*       yX11__unit_loc          (char *a_question, int a_num, char a_scrn);
 
 
 #endif
