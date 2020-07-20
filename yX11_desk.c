@@ -181,7 +181,7 @@ yx11_full_refresh       (char a_real)
 }
 
 char
-yX11_desktop_current    (char *a_name)
+yX11_desk_current       (char *a_name)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -219,12 +219,14 @@ yx11_desktop__cursor    (char a_action, char a_move, char *a_name)
    char        x_orig      [LEN_LABEL] = "";
    char        o           =    0;
    static char n           =    0;
+   char        m           =   -1;
+   char        x_tries     =    0;
    /*---(header)-------------------------*/
    DEBUG_DESK   yLOG_enter   (__FUNCTION__);
    DEBUG_DESK   yLOG_complex ("args"      , "%c, %d, %p", a_action, a_move, a_name);
    /*---(prepare)------------------------*/
    if (a_name != NULL)  strlcpy (a_name, "", LEN_LABEL);
-   o  = yX11_desktop_current (x_orig); /* never assume, update */
+   o  = yX11_desk_current (x_orig); /* never assume, update */
    if (a_action == 'y')  n = o;
    DEBUG_DESK   yLOG_value   ("current"   , n);
    /*---(defense)------------------------*/
@@ -234,9 +236,13 @@ yx11_desktop__cursor    (char a_action, char a_move, char *a_name)
       return rce;
    }
    /*---(direct move)--------------------*/
-   --rce;  if (a_move >= 0 && a_move <= 20) {
+   --rce;  if (a_move >= 0 && a_move <= 9) {
       DEBUG_DESK   yLOG_note    ("move by reference");
       n = a_move;
+   }
+   else if (a_move >= '0' && a_move <= '9') {
+      DEBUG_DESK   yLOG_note    ("move by reference");
+      n = a_move - '0';
    }
    /*---(cursoring)----------------------*/
    else {
@@ -293,9 +299,13 @@ yx11_desktop__cursor    (char a_action, char a_move, char *a_name)
       DEBUG_DESK   yLOG_info    ("t"         , t);
       rc = system (t);
       DEBUG_DESK   yLOG_value   ("system"    , rc);
-      sleep (1);  /* appears to have a update/caching delay */
+      while (m != n && x_tries < 10) {
+         m  = yX11_desk_current (a_name);
+         if (n == m)  break;
+         usleep (100000);  /* appears to have a update/caching delay */
+         ++x_tries;
+      }
       /*---(update current)-----------------*/
-      n  = yX11_desktop_current (a_name);
       DEBUG_DESK   yLOG_value   ("current"   , n);
    } else {
       if (a_name != NULL)  strlcpy (a_name, s_desks [n].label, LEN_LABEL);
@@ -306,15 +316,15 @@ yx11_desktop__cursor    (char a_action, char a_move, char *a_name)
 }
 
 char
-yX11_desktop_cursor     (char a_move, char *a_name)
+yX11_desk_cursor        (char a_move, char *a_name)
 {
    return yx11_desktop__cursor ('-', a_move, a_name);
 }
 
 char
-yX11_desktop_move       (char a_move, char *a_name)
+yX11_desk_goto          (char a_move)
 {
-   return yx11_desktop__cursor ('y', a_move, a_name);
+   return yx11_desktop__cursor ('y', a_move, NULL);
 }
 
 char
@@ -340,7 +350,7 @@ yx11_desktop__regex     (char a_action, char *a_regex, char *a_name, int *a_coun
       return rce;
    }
    /*---(update)-------------------------*/
-   n  = o  = yX11_desktop_current (x_orig); /* never assume, update */
+   n  = o  = yX11_desk_current (x_orig); /* never assume, update */
    DEBUG_DESK   yLOG_value   ("current"   , n);
    /*---(compile)------------------------*/
    rc = yREGEX_comp (a_regex);
@@ -360,12 +370,9 @@ yx11_desktop__regex     (char a_action, char *a_regex, char *a_name, int *a_coun
       DEBUG_DESK   yLOG_note    ("FOUND");
       ++c;
       if (c == 1) {
-         if (a_action == 'y') {
-            n = yX11_desktop_move (i, a_name);
-         } else {
-            if (a_name != NULL)  strlcpy (a_name, s_desks [n].label, LEN_LABEL);
-            n = i;
-         }
+         if (a_name != NULL)  strlcpy (a_name, s_desks [n].label, LEN_LABEL);
+         if (a_action == 'y') n = yX11_desk_goto (i);
+         else                 n = i;
       }
    }
    /*---(trouble)------------------------*/
@@ -380,18 +387,9 @@ yx11_desktop__regex     (char a_action, char *a_regex, char *a_name, int *a_coun
 }
 
 char
-yX11_desktop_activate   (char *a_regex, char *a_name, int *a_count)
+yX11_desk_find          (char *a_regex, char *a_name, int *a_count)
 {
-   return yx11_desktop__regex ('y', a_regex, a_name, a_count);
-}
-
-char
-yX11_desktop_exists         (char *a_regex)
-{
-   int         n           =    0;
-   int         c           =    0;
-   n = yx11_desktop__regex ('-', a_regex, NULL, &c);
-   return c;
+   return yx11_desktop__regex ('-', a_regex, a_name, a_count);
 }
 
 
@@ -409,6 +407,7 @@ yX11__unit_desk         (char *a_question, int a_num)
    int         i           =    0;
    /*---(initialize)---------------------*/
    strlcpy (unit_answer, "DESK unit        : unknown request", LEN_RECD);
+   yx11_full_refresh ('y');
    /*---(string testing)-----------------*/
    if      (strncmp (a_question, "count"   , 20)  == 0) {
       strlcpy (t, "", LEN_RECD);

@@ -28,8 +28,8 @@
 
 #define     P_VERMAJOR  "1.--  working for everyday use, evolving but stable"
 #define     P_VERMINOR  "1.1-  adding desktop control for zeus and scripting"
-#define     P_VERNUM    "1.1b"
-#define     P_VERTXT    "terminal creation and window placement working and unit tested"
+#define     P_VERNUM    "1.1c"
+#define     P_VERTXT    "created windowing and keystroke functions for kairos"
 
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -217,18 +217,31 @@ char*       yX11__unit_desk         (char *a_question, int a_num);
 /*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
 /*---(program)--------------*/
 char        yx11_win_purge          (void);
-char        yx11_win_short_purge    (void);
 char        yx11_win_init           (void);
 /*---(inventory)------------*/
 char        yx11_win_inventory      (char a_real);
 char        yx11_win_current        (char a_real);
+char        yx11_win__activate      (long a_win, char a_desk);
+char        yx11_win__verify        (long a_win);
+long        yx11_win__regex         (char *a_regex, char *a_name, int *a_count);
+char*       yX11__unit_win          (char *a_question, long a_num);
 
+
+char        yx11_keys__normal       (uchar a_ch);
+char        yx11_keys__extended     (uchar a_ch);
+char        yx11_keys__extra        (uchar a_ch);
+char*       yX11__unit_keys         (char *a_question, int a_num);
+char        yx11__unit_keys_read    (void);
 
 
 char        yx11_loc_init           (void);
 char        yx11_loc_sizing         (char a_abbr, char a_scrn, int *a_left, int *a_topp, int *a_wide, int *a_tall);
 char*       yX11__unit_loc          (char *a_question, int a_num, char a_scrn);
 
+char        yx11_yvikeys_purge      (void);
+char        yx11_yvikeys_valid      (uchar a_abbr);
+char        yx11_yvikeys__desktop   (char a_desk);
+char*       yX11__unit_yvikeys      (char *a_question, int a_num);
 
 #endif
 

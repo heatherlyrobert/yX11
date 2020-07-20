@@ -13,11 +13,11 @@ yX11_version       (void)
 {
    char    t [20] = "";
 #if    __TINYC__ > 0
-   strncpy (t, "[tcc built]", 15);
+   strncpy (t, "[tcc built  ]", 15);
 #elif  __GNUC__  > 0
-   strncpy (t, "[gnu gcc  ]", 15);
+   strncpy (t, "[gnu gcc    ]", 15);
 #else
-   strncpy (t, "[unknown  ]", 15);
+   strncpy (t, "[unknown    ]", 15);
 #endif
    snprintf (yX11_ver, 100, "%s   %s : %s", t, P_VERNUM, P_VERTXT);
    return yX11_ver;
@@ -41,6 +41,16 @@ char
 yx11_base_defense       (void)
 {
    if (YX_DISP == NULL)   return -1;
+   return 0;
+}
+
+char
+yX11_reset              (void)
+{
+   yx11_desk_init ();
+   yx11_win_init  ();
+   yx11_loc_init  ();
+   yx11_full_refresh  ('y');
    return 0;
 }
 
@@ -80,9 +90,7 @@ yX11_start (
    yX11_opengl__connect ();
    yX11_base__create    ();
    yX11_opengl__create  ();
-   yx11_desk_init       ();
-   yx11_win_init        ();
-   yx11_loc_init        ();
+   yX11_reset           ();
    DEBUG_YXINIT printf("yXINIT -- heatherly xlib/glx setup -------------------------------------------- (end)\n\n");
    /*---(complete)-------------------------*/
    return 0;
@@ -415,10 +423,7 @@ char       /*----: set up program urgents/debugging --------------------------*/
 yX11__unit_quiet   (void)
 {
    yLOGS_begin ("yX11" , YLOG_SYS, YLOG_QUIET);
-   yx11_desk_init ();
-   yx11_win_init  ();
-   yx11_loc_init        ();
-   yx11_full_refresh  ('y');
+   yX11_reset ();
    return 0;
 }
 
@@ -430,10 +435,7 @@ yX11__unit_loud    (void)
    yURG_name  ("desk"         , YURG_ON);
    yURG_name  ("ystr"         , YURG_ON);
    DEBUG_DESK   yLOG_info     ("yX11"    , yX11_version   ());
-   yx11_desk_init ();
-   yx11_win_init  ();
-   yx11_loc_init        ();
-   yx11_full_refresh  ('y');
+   yX11_reset ();
    return 0;
 }
 

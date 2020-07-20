@@ -216,7 +216,8 @@ yx11_loc_exact          (long a_win, char d, int x, int y, int w, int t)
    sprintf (x_pre, "wmctrl -i -r %ld", a_win);
    sprintf (x_suf, "> /dev/null 2> /dev/null");
    /*---(set desktop)--------------------*/
-   sprintf (x_loc, "-t %d", d);
+   if (d != -1)  sprintf (x_loc, "-t %d", d);
+   else          sprintf (x_loc, "-b add,sticky");
    sprintf (x_cmd, "%s %s %s", x_pre, x_loc, x_suf);
    DEBUG_DESK   yLOG_info    ("command"   , x_cmd);
    rc = system  (x_cmd);
@@ -233,7 +234,7 @@ yx11_loc_exact          (long a_win, char d, int x, int y, int w, int t)
 }
 
 char
-yX11_place              (long a_win, char a_desk, char a_abbr, char a_scrn)
+yX11_win_place          (long a_win, char a_desk, char a_abbr, char a_scrn)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -259,16 +260,22 @@ yX11_place              (long a_win, char a_desk, char a_abbr, char a_scrn)
 }
 
 char
-yX11_exact              (long a_win, char d, int x, int y, int w, int t)
+yX11_win_exact          (long a_win, char d, int x, int y, int w, int t)
 {
+   char        rc          =    0;
    int         cd, cx, cy, cw, ct;
-   yX11_where  (a_win, &cd, &cx, &cy, &cw, &ct);
+   /*---(header)-------------------------*/
+   DEBUG_DESK   yLOG_enter   (__FUNCTION__);
+   yX11_win_where  (a_win, &cd, &cx, &cy, &cw, &ct);
    if (d == -1)  d = cd;
    if (x == -1)  x = cx;
    if (y == -1)  y = cy;
    if (w == -1)  w = cw;
    if (t == -1)  t = ct;
-   return yx11_loc_exact (a_win, d, x, y, w, t);
+   rc = yx11_loc_exact (a_win, d, x, y, w, t);
+   /*---(complete)-----------------------*/
+   DEBUG_DESK   yLOG_exit    (__FUNCTION__);
+   return rc;
 }
 
 
@@ -286,6 +293,7 @@ yX11__unit_loc          (char *a_question, int a_num, char a_scrn)
    /*---(initialize)---------------------*/
    strlcpy (unit_answer, "LOC unit         : unknown request", LEN_RECD);
    /*---(string testing)-----------------*/
+   yx11_full_refresh ('y');
    if      (strncmp (a_question, "entry"     , 20)  == 0) {
       n = yx11_loc_sizing (a_num, a_scrn, NULL, NULL, NULL, NULL);
       if (n >= 0 && n < s_nloc) {
