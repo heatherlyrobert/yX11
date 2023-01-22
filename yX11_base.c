@@ -1,6 +1,13 @@
 #include "yX11.h"
 #include "yX11_priv.h"
 
+Display       *YX_DISP;
+int            YX_SCRN;
+Window         YX_BASE;
+Window         YX_ROOT;
+Window         YX_FOCU;
+XEvent         YX_EVNT;
+XKeyEvent      YX_SKEY;
 
 #define   DEBUG      if (gXINIT.verbose) 
 
@@ -66,10 +73,15 @@ yX11_start (
       char      a_focusable,           /* will/should it accept focus         */
       char      a_resizeable,          /* will/should it resize               */
       char      a_verbose)             /* debugging noise desired             */
-{  /*---(start)----------------------------*/
+{
+   char        rc          =    0;
+   /*---(header)---------------------------*/
+   DEBUG_YXWIN   yLOG_enter   (__FUNCTION__);
+   /*---(start)----------------------------*/
    VERBOSE = 'n';
    if (a_verbose == 'y') VERBOSE = 'y';
    DEBUG_YXINIT printf("yXINIT -- heatherly xlib/glx setup ------------------------------------------ (start)\n\n");
+   DEBUG_YXWIN   yLOG_enter   (__FUNCTION__);
    /*---(establish verbosity)--------------*/
    DEBUG_YXINIT printf("starting up...\n");
    DEBUG_YXINIT printf("   - setting verbosity . . . . . . . . . . %d\n", VERBOSE);
@@ -86,13 +98,19 @@ yX11_start (
    DEBUG_YXINIT printf("%c\n", CAN_FOCUS);
    /*---(reset summary counters)-------*/
    DEBUG_YXINIT printf("   - start executing setup functions\n\n");
-   yX11_base__connect   ();
-   yX11_opengl__connect ();
-   yX11_base__create    ();
-   yX11_opengl__create  ();
-   yX11_reset           ();
+   rc = yX11_base__connect   ();
+   DEBUG_YXWIN   yLOG_value   ("b connect" , rc);
+   rc = yX11_opengl__connect ();
+   DEBUG_YXWIN   yLOG_value   ("o connect" , rc);
+   rc = yX11_base__create    ();
+   DEBUG_YXWIN   yLOG_value   ("b create"  , rc);
+   rc = yX11_opengl__create  ();
+   DEBUG_YXWIN   yLOG_value   ("o create"  , rc);
+   rc = yX11_reset           ();
+   DEBUG_YXWIN   yLOG_value   ("reset"     , rc);
    DEBUG_YXINIT printf("yXINIT -- heatherly xlib/glx setup -------------------------------------------- (end)\n\n");
    /*---(complete)-------------------------*/
+   DEBUG_YXWIN   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -109,9 +127,16 @@ yX11_screensize      (int *a_wide, int *a_tall, int *a_deep)
 char
 yX11_resize          (int a_wide, int a_tall)
 {
+   /*---(header)-------------------------*/
+   DEBUG_YXWIN   yLOG_enter   (__FUNCTION__);
+   DEBUG_YXWIN   yLOG_value   ("a_wide"    , a_wide);
+   DEBUG_YXWIN   yLOG_value   ("a_tall"    , a_tall);
+   DEBUG_YXWIN   yLOG_point   ("YX_DIST"   , YX_DISP);
+   DEBUG_YXWIN   yLOG_point   ("YX_BASE"   , YX_BASE);
    /*---(shut the old down)----------------*/
    XResizeWindow (YX_DISP, YX_BASE, a_wide, a_tall);
    /*---(complete)-------------------------*/
+   DEBUG_YXWIN   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -127,10 +152,15 @@ yX11_move            (int a_xpos, int a_ypos)
 char
 yX11_end             (void)
 {
-   DEBUG_YXINIT printf("\nyXINIT -- heatherly xlib/glx destroy ---------------------------------------- (start)\n\n");
-   yX11_opengl__destroy();
-   yX11_base__destroy();
-   DEBUG_YXINIT printf("yXINIT -- heatherly xlib/glx setup -------------------------------------------- (end)\n\n");
+   /*---(locals)-----------+-----+-----+-*/
+   char        rc          =    0;
+   /*---(header)-------------------------*/
+   DEBUG_YXWIN   yLOG_enter   (__FUNCTION__);
+   rc = yX11_opengl__destroy();
+   DEBUG_YXWIN   yLOG_value   ("opengl"    , rc);
+   rc = yX11_base__destroy();
+   DEBUG_YXWIN   yLOG_value   ("base"      , rc);
+   DEBUG_YXWIN   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -143,76 +173,57 @@ yX11__error       (Display *a_disp, XErrorEvent *a_event)
 char
 yX11_base__connect        (void)
 {
-   DEBUG_YXINIT  printf("x11/xlib connection (YX_DISP, YX_SCRN, YX_ROOT, FOCU)...¦");
-   /*---(connect)-------------------------------*/
-   DEBUG_YXINIT printf("   - xserver connection  . . . . .  (YX_DISP) ");
-   YX_DISP = XOpenDisplay(NULL);      /* pull the default                 */
-   if (YX_DISP == NULL) {
-      DEBUG_YXINIT printf("NULL, EXITING\naborted\n");
-      return -1;
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   int         trash;
+   /*---(header)-------------------------*/
+   DEBUG_YXWIN   yLOG_enter   (__FUNCTION__);
+   DEBUG_YXWIN   yLOG_note    ("x11/xlib connection (YX_DISP, YX_SCRN, YX_ROOT, FOCU)");
+   /*---(connect)------------------------*/
+   YX_DISP   = XOpenDisplay(NULL);      /* pull the default                 */
+   DEBUG_YXWIN   yLOG_point   ("xserver"   , YX_DISP);
+   --rce;  if (YX_DISP == NULL) {
+      DEBUG_YXWIN   yLOG_note    ("server connection failed");
+      DEBUG_YXWIN   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
    }
-   DEBUG_YXINIT printf("%p¦", (void *) YX_DISP);
-   /*---(get the connection number)-------------*/
-   DEBUG_YXINIT printf("   - connection number . . . . . . . . . . ");
-   DEBUG_YXINIT printf("%d¦", ConnectionNumber(YX_DISP));
-   /*---(get the vendor)------------------------*/
-   DEBUG_YXINIT printf("   - server vendor . . . . . . . . . . . . ");
-   DEBUG_YXINIT printf("%s¦", ServerVendor(YX_DISP));
-   /*---(get the vendor release)----------------*/
-   DEBUG_YXINIT printf("   - server vendor release . . . . . . . . ");
-   DEBUG_YXINIT printf("%d¦", VendorRelease(YX_DISP));
-   /*---(get the protocol version)--------------*/
-   DEBUG_YXINIT printf("   - protocol version  . . . . . . . . . . ");
-   DEBUG_YXINIT printf("v%dr%d¦", ProtocolVersion(YX_DISP), ProtocolRevision(YX_DISP));
-   /*---(show the display name)-----------------*/
-   DEBUG_YXINIT printf("   - display name  . . . . . . . . . . . . ");
-   DEBUG_YXINIT printf("%s¦", DisplayString(YX_DISP));
-   /*---(show the screen count)-----------------*/
-   DEBUG_YXINIT printf("   - number of screens . . . . . . . . . . ");
-   DEBUG_YXINIT printf("%d¦", ScreenCount(YX_DISP));
-   /*---(show the current screen)---------------*/
-   DEBUG_YXINIT printf("   - CURRENT SCREEN  . . . . . . .  (YX_SCRN) ");
-   YX_SCRN = DefaultScreen(YX_DISP);
-   DEBUG_YXINIT printf("%d¦", YX_SCRN);
-   /*---(get the screen pointer)----------------*/
-   DEBUG_YXINIT printf("   - screen pointer  . . . . . . . . . . . ");
-   SCRN_PTR    = DefaultScreenOfDisplay(YX_DISP);
-   DEBUG_YXINIT printf("%p\n", (void *) SCRN_PTR);
-   /*---(show the size)-------------------------*/
-   DEBUG_YXINIT printf("   - screen size . . . . . . . . . . . . . ");
-   DEBUG_YXINIT printf("%dw, %dh¦", DisplayWidth(YX_DISP, YX_SCRN), DisplayHeight(YX_DISP, YX_SCRN));
-   /*---(show the depth)------------------------*/
-   DEBUG_YXINIT printf("   - screen depth  . . . . . . . . . . . . ");
-   DEBUG_YXINIT printf("%d¦", DefaultDepth(YX_DISP, YX_SCRN));
-   /*---(show the root window)------------------*/
-   DEBUG_YXINIT printf("   - root window . . . . . . .   (YX_ROOT) ");
+   /*---(display server info)------------*/
+   YX_SCRN   = DefaultScreen(YX_DISP);
+   SCRN_PTR  = DefaultScreenOfDisplay(YX_DISP);
+   DEBUG_YXWIN   yLOG_value   ("number"    , ConnectionNumber(YX_DISP));
+   DEBUG_YXWIN   yLOG_info    ("vendor"    , ServerVendor(YX_DISP));
+   DEBUG_YXWIN   yLOG_value   ("release"   , VendorRelease(YX_DISP));
+   DEBUG_YXWIN   yLOG_complex ("protocol"  , "%dv, %dr", ProtocolVersion(YX_DISP), ProtocolRevision(YX_DISP));
+   DEBUG_YXWIN   yLOG_info    ("display"   , DisplayString(YX_DISP));
+   DEBUG_YXWIN   yLOG_value   ("screens"   , ScreenCount(YX_DISP));
+   DEBUG_YXWIN   yLOG_value   ("current"   , YX_SCRN);
+   DEBUG_YXWIN   yLOG_point   ("pointer"   , SCRN_PTR);
+   DEBUG_YXWIN   yLOG_complex ("size"      , "%dw, %dh",DisplayWidth(YX_DISP, YX_SCRN), DisplayHeight(YX_DISP, YX_SCRN));
+   DEBUG_YXWIN   yLOG_value   ("depth"     , DefaultDepth(YX_DISP, YX_SCRN));
+   /*---(show the root window)-----------*/
    YX_ROOT   = RootWindow(YX_DISP, YX_SCRN);
-   if (YX_ROOT == 0) {
-      DEBUG_YXINIT printf("NULL, EXITING\naborted\n");
-      return -3;
+   DEBUG_YXWIN   yLOG_point   ("root"      , YX_ROOT);
+   --rce;  if (YX_ROOT == 0) {
+      DEBUG_YXWIN   yLOG_note    ("root window empty");
+      DEBUG_YXWIN   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
    }
-   DEBUG_YXINIT printf("%ld\n", YX_ROOT);
-   /*---(show the colormap entries)-------------*/
-   DEBUG_YXINIT printf("   - color map entries . . . . . . . . . . ");
-   DEBUG_YXINIT printf("%d¦", DisplayCells (YX_DISP, YX_SCRN));
-   /*---(show the backing store)----------------*/
-   DEBUG_YXINIT printf("   - backing store . . . . . . . . . . . . ");
-   DEBUG_YXINIT printf("%d\n", DoesBackingStore (SCRN_PTR));
-   /*---(current focus window)------------------*/
-   DEBUG_YXINIT printf("   - focus window  . . . . . . . .  (FOCU) ");
-   int trash;
+   /*---(show the colormap entries)------*/
+   DEBUG_YXWIN   yLOG_value   ("colormap"  , DisplayCells (YX_DISP, YX_SCRN));
+   DEBUG_YXWIN   yLOG_value   ("backing"   , DoesBackingStore (SCRN_PTR));
+   /*---(current focus window)-----------*/
    XGetInputFocus(YX_DISP, &YX_FOCU, &trash);
-   if (YX_FOCU == 0) {
-      DEBUG_YXINIT printf("NULL, EXITING\naborted\n");
-      return -4;
+   DEBUG_YXWIN   yLOG_point   ("focus"     , YX_FOCU);
+   --rce;  if (YX_FOCU == 0) {
+      DEBUG_YXWIN   yLOG_note    ("focus window empty");
+      DEBUG_YXWIN   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
    }
-   DEBUG_YXINIT printf("%ld\n", YX_FOCU);
-   /*-------------------------------------------*/
-   DEBUG_YXINIT printf("   - setup error handler . . . . . . . . . ");
+   /*------------------------------------*/
+   DEBUG_YXWIN   yLOG_note    ("setup error handler");
    XSetErrorHandler (yX11__error);
-   DEBUG_YXINIT printf ("success\n");
-   /*---(complete)------------------------------*/
-   DEBUG_YXINIT printf("   - done\n\n");
+   /*---(complete)-----------------------*/
+   DEBUG_YXWIN   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -227,7 +238,8 @@ yX11_base__create        (void)
     */
    /*---(defense)-------------------------------*/
    if (yx11_base_defense () < 0)  return -1;
-   /*---(start message)-------------------------*/
+   /*---(header)-------------------------*/
+   DEBUG_YXWIN   yLOG_enter   (__FUNCTION__);
    DEBUG_YXINIT printf("x11/xlib main window (CMAP, YX_BASE, CON1, CON2)...¦");
    XSetWindowAttributes   attr;
    XColor         xc1, xc2;
@@ -307,24 +319,35 @@ yX11_base__create        (void)
    DEBUG_YXINIT printf("%dx, %dy, %dw, %dh\n", X, Y, WIDTH, HEIGHT);
    /*---(complete)------------------------------*/
    DEBUG_YXINIT printf("   - done\n\n");
+   DEBUG_YXWIN   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
 char
 yX11_base__destroy      (void)
 {
-   DEBUG_YXINIT  printf("wrapping up of xwindows connection...\n");
+   char        rce         =  -10;
+   char        rc          =    0;
+   /*---(header)-------------------------*/
+   DEBUG_YXWIN   yLOG_enter   (__FUNCTION__);
+   DEBUG_YXWIN   yLOG_note    ("wrapping up of xwindows connection");
    /*---(defense)-------------------------------*/
-   if (yx11_base_defense () < 0)  return -1;
+   rc = yx11_base_defense ();
+   DEBUG_YXWIN   yLOG_value   ("defense"   , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_YXWIN   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(wipe window)---------------------------*/
+   DEBUG_YXWIN   yLOG_note    ("unmap window");
    XUnmapWindow   (YX_DISP, YX_BASE);
+   DEBUG_YXWIN   yLOG_note    ("destroy window");
    XDestroyWindow (YX_DISP, YX_BASE);
    /*---(disconnect)----------------------------*/
-   DEBUG_YXINIT  printf("   - closing connection  . . . . . . . . . ");
-   XCloseDisplay(YX_DISP);
-   DEBUG_YXINIT  printf("success\n");
+   DEBUG_YXWIN   yLOG_note    ("close connection");
+   /*> XCloseDisplay  (YX_DISP);                                                      <*/
    /*---(complete)------------------------------*/
-   DEBUG_YXINIT  printf("   - done\n\n");
+   DEBUG_YXWIN   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -422,7 +445,6 @@ char   unit_answer [LEN_RECD];
 char       /*----: set up program urgents/debugging --------------------------*/
 yX11__unit_quiet   (void)
 {
-   yLOGS_begin ("yX11" , YLOG_SYS, YLOG_QUIET);
    yX11_reset ();
    return 0;
 }
@@ -431,10 +453,10 @@ char       /*----: set up program urgents/debugging --------------------------*/
 yX11__unit_loud    (void)
 {
    yLOGS_begin ("yX11" , YLOG_SYS, YLOG_NOISE);
-   yURG_name  ("kitchen"      , YURG_ON);
-   yURG_name  ("desk"         , YURG_ON);
-   yURG_name  ("ystr"         , YURG_ON);
-   DEBUG_DESK   yLOG_info     ("yX11"    , yX11_version   ());
+   yURG_by_name  ("kitchen"      , YURG_ON);
+   yURG_by_name  ("desk"         , YURG_ON);
+   yURG_by_name  ("ystr"         , YURG_ON);
+   DEBUG_YXWIN   yLOG_info     ("yX11"    , yX11_version   ());
    yX11_reset ();
    return 0;
 }

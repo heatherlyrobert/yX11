@@ -18,14 +18,22 @@
 #define    MAX_WINS   100
 typedef struct cWINS tWINS;
 static struct cWINS {
+   /*---(reference)---------*/
    long        id;
-   char        curr;
+   /*---(key data)----------*/
    char        desk;
-   char        title       [LEN_HUND];
+   char        title       [LEN_FULL];
+   char        curr;
+   char        type;                    /* window use based on title          */
+   /*---(position)----------*/
    short       left;
    short       topp;
    short       wide;
    short       tall;
+   char        size;
+   char        scrn;
+   char        locn;
+   /*---(done)--------------*/
 };
 static tWINS s_wins  [MAX_WINS];
 int          s_nwin       = 0;  /* public to assist unit testing    */
@@ -48,14 +56,22 @@ yx11_win_purge          (void)
    /*---(initialize)---------------------*/
    s_nwin = 0;
    for (i = 0; i < MAX_WINS; ++i) {
+      /*---(reference)------*/
       s_wins [i].id        = -1;
-      s_wins [i].curr      = '-';
+      /*---(key data)-------*/
       s_wins [i].desk      = -1;
       s_wins [i].title [0] = '\0';
-      s_wins [i].left      =  0;
-      s_wins [i].topp      =  0;
-      s_wins [i].wide      =  0;
-      s_wins [i].tall      =  0;
+      s_wins [i].curr      = '·';
+      s_wins [i].type      = '·';
+      /*---(position)-------*/
+      s_wins [i].left      = -1;
+      s_wins [i].topp      = -1;
+      s_wins [i].wide      = -1;
+      s_wins [i].tall      = -1;
+      s_wins [i].size      = '·';
+      s_wins [i].scrn      = '·';
+      s_wins [i].locn      = '·';
+      /*---(done)-----------*/
    }
    /*---(complete)-----------------------*/
    DEBUG_DESK   yLOG_sexit   (__FUNCTION__);
@@ -83,6 +99,14 @@ yx11_win_init           (void)
 /*===----                    window inventory                          ----===*/
 /*====================------------------------------------====================*/
 static void      o___INVENTORY_______________o (void) {;}
+
+char
+yx11_win__type            (cchar *a_title)
+{
+   if (a_title == NULL)  return '·';
+   if (strstr (a_title, "VIM") != NULL)  return 'v';
+   return '·';
+}
 
 char
 yx11_win_inventory      (char a_real)
@@ -142,7 +166,10 @@ yx11_win_inventory      (char a_real)
       x_len = strlen (p);
       p += x_len + 1;
       strltrim (p, ySTR_BOTH, LEN_RECD);
-      strlcpy (s_wins [s_nwin].title, p, LEN_HUND);
+      strlcpy (s_wins [s_nwin].title, p, LEN_FULL);
+      s_wins [s_nwin].type =  yx11_win__type (p);
+      s_wins [s_nwin].size =  yx11_loc_by_size (s_wins [s_nwin].wide, s_wins [s_nwin].tall, NULL);
+      s_wins [s_nwin].locn =  yx11_loc_by_locn (s_wins [s_nwin].size, s_wins [s_nwin].left, s_wins [s_nwin].topp, NULL, &(s_wins [s_nwin].scrn));
       DEBUG_DESK   yLOG_complex ("result"    , "%d %10.10x %2d %s", s_nwin, s_wins [s_nwin].id, s_wins [s_nwin].desk, s_wins  [s_nwin].title);
       yx11_desk_addwin (s_wins [s_nwin].desk);
       ++s_nwin;
@@ -207,6 +234,7 @@ yx11_win_current        (char a_real)
       DEBUG_DESK   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   for (i = 0; i < s_nwin; ++i)  s_wins [i].curr = '·';
    /*---(mark window)--------------------*/
    for (i = 0; i < s_nwin; ++i) {
       DEBUG_DESK   yLOG_complex ("checking"  , "%d %10d %2d %s", i, s_wins [i].id, s_wins [i].desk, s_wins  [i].title);
@@ -252,6 +280,94 @@ yX11_win_current        (char *a_name, char *a_desk)
    /*---(trouble)------------------------*/
    DEBUG_DESK   yLOG_exitr   (__FUNCTION__, rce);
    return rce;
+}
+
+char
+yX11_win_by_name        (char a_move, long *r_id, char *r_desk, char *r_title, char *r_type, char *r_curr, short *r_left, short *r_topp, char *r_scrn, char *r_locn, short *r_wide, short *r_tall, char *r_size)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   char        t           [LEN_FULL]  = "";
+   char        x_orig      [LEN_LABEL] = "";
+   long        x           =    0;
+   static char n           =    0;
+   char        m           =   -1;
+   char        x_tries     =    0;
+   /*---(header)-------------------------*/
+   DEBUG_DESK   yLOG_enter   (__FUNCTION__);
+   DEBUG_DESK   yLOG_complex ("args"      , "%c, %p, %p", a_move, r_title, r_id);
+   /*---(prepare)------------------------*/
+   if (r_id    != NULL)  *r_id   = -1;
+   if (r_desk  != NULL)  *r_desk = -1;
+   if (r_title != NULL)  strlcpy (r_title, "", LEN_FULL);
+   if (r_type  != NULL)  *r_type = '·';
+   if (r_curr  != NULL)  *r_curr = '·';
+   if (r_left  != NULL)  *r_left = -1;
+   if (r_topp  != NULL)  *r_topp = -1;
+   if (r_scrn  != NULL)  *r_scrn = '·';
+   if (r_locn  != NULL)  *r_locn = '·';
+   if (r_wide  != NULL)  *r_wide = -1;
+   if (r_tall  != NULL)  *r_tall = -1;
+   if (r_size  != NULL)  *r_size = '·';
+   /*---(prepare)------------------------*/
+   DEBUG_DESK   yLOG_value   ("s_nwin"    , s_nwin);
+   /*---(cursoring)----------------------*/
+   switch (a_move) {
+   case YDLST_HEAD :
+      DEBUG_DESK   yLOG_note    ("move to first");
+      n = 0;
+      break;
+   case YDLST_NEXT :
+      DEBUG_DESK   yLOG_note    ("move to next");
+      ++n;
+      break;
+   case YDLST_CURR :
+      DEBUG_DESK   yLOG_note    ("move to current");
+      break;
+   case YDLST_PREV :
+      DEBUG_DESK   yLOG_note    ("move to previous");
+      --n;
+      break;
+   case YDLST_TAIL :
+      DEBUG_DESK   yLOG_note    ("move to last");
+      n = s_nwin - 1;
+      break;
+   default  :
+      DEBUG_DESK   yLOG_note    ("move not understood");
+      DEBUG_DESK   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(range checking)-----------------*/
+   DEBUG_DESK   yLOG_value   ("requested" , n);
+   --rce;  if (n < 0) {
+      DEBUG_DESK   yLOG_note    ("before start, updated to head");
+      n = 0;
+      DEBUG_DESK   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   --rce;  if (n >= s_nwin) {
+      DEBUG_DESK   yLOG_note    ("before after end, updated to tail");
+      n = s_nwin - 1;
+      DEBUG_DESK   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(save-back)----------------------*/
+   if (r_id    != NULL)  *r_id   = s_wins [n].id;
+   if (r_desk  != NULL)  *r_desk = s_wins [n].desk;
+   if (r_title != NULL)  strlcpy (r_title, s_wins [n].title, LEN_FULL);
+   if (r_type  != NULL)  *r_type = s_wins [n].type;
+   if (r_curr  != NULL)  *r_curr = s_wins [n].curr;
+   if (r_left  != NULL)  *r_left = s_wins [n].left;
+   if (r_topp  != NULL)  *r_topp = s_wins [n].topp;
+   if (r_scrn  != NULL)  *r_scrn = s_wins [n].scrn;
+   if (r_locn  != NULL)  *r_locn = s_wins [n].locn;
+   if (r_wide  != NULL)  *r_wide = s_wins [n].wide;
+   if (r_tall  != NULL)  *r_tall = s_wins [n].tall;
+   if (r_size  != NULL)  *r_size = s_wins [n].size;
+   /*---(complete)-----------------------*/
+   DEBUG_DESK   yLOG_exit    (__FUNCTION__);
+   return n;
 }
 
 char
@@ -322,7 +438,7 @@ yX11_win_where          (long a_win, char *d, int *x, int *y, int *w, int *t)
 }
 
 long
-yx11_win__regex         (char *a_regex, char *a_name, int *a_count)
+yx11_win__regex         (char *a_regex, char *r_name, int *r_count)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -332,10 +448,10 @@ yx11_win__regex         (char *a_regex, char *a_name, int *a_count)
    int         c           =    0;
    /*---(header)-------------------------*/
    DEBUG_DESK   yLOG_enter   (__FUNCTION__);
-   DEBUG_DESK   yLOG_complex ("args"      , "%p, %p, %p", a_regex, a_name, a_count);
+   DEBUG_DESK   yLOG_complex ("args"      , "%p, %p, %p", a_regex, r_name, r_count);
    /*---(prepare)------------------------*/
-   if (a_name  != NULL)  strlcpy (a_name, "", LEN_HUND);
-   if (a_count != NULL)  *a_count = 0;
+   if (r_name  != NULL)  strlcpy (r_name, "", LEN_FULL);
+   if (r_count != NULL)  *r_count = 0;
    /*---(defense)------------------------*/
    --rce;  if (a_regex == NULL || strlen (a_regex) == 0) {
       DEBUG_RPTG   yLOG_exitr   (__FUNCTION__, rce);
@@ -354,14 +470,14 @@ yx11_win__regex         (char *a_regex, char *a_name, int *a_count)
    --rce;  for (i = 0; i < s_nwin; ++i) {
       /*---(filter)----------------------*/
       DEBUG_DESK   yLOG_complex ("checking"  , "%d %10d %2d %s", i, s_wins [i].id, s_wins [i].desk, s_wins  [i].title);
-      rc = yREGEX_fast (s_wins [i].title);
+      rc = yREGEX_filter (s_wins [i].title);
       DEBUG_INPT   yLOG_value   ("exec"      , rc);
       if (rc <= 0)    continue;
       /*---(found)-----------------------*/
       DEBUG_DESK   yLOG_note    ("FOUND");
       ++c;
       if (c == 1) {
-         if (a_name != NULL)  strlcpy (a_name, s_wins [n].title, LEN_HUND);
+         if (r_name != NULL)  strlcpy (r_name, s_wins [n].title, LEN_FULL);
          n = i;
       }
    }
@@ -370,7 +486,7 @@ yx11_win__regex         (char *a_regex, char *a_name, int *a_count)
       DEBUG_DESK   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   if (a_count != NULL)  *a_count = c;
+   if (r_count != NULL)  *r_count = c;
    /*---(complete)-----------------------*/
    DEBUG_DESK   yLOG_exit    (__FUNCTION__);
    return s_wins [n].id;
@@ -516,12 +632,12 @@ yX11_term               (char a_desk, char a_abbr, char a_scrn, char *a_color)
    /*---(header)-------------------------*/
    DEBUG_DESK   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
-   rc = yx11_base_defense ();
-   DEBUG_DESK   yLOG_value   ("defense"   , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_DESK   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
+   /*> rc = yx11_base_defense ();                                                     <* 
+    *> DEBUG_DESK   yLOG_value   ("defense"   , rc);                                  <* 
+    *> --rce;  if (rc < 0) {                                                          <* 
+    *>    DEBUG_DESK   yLOG_exitr   (__FUNCTION__, rce);                              <* 
+    *>    return rce;                                                                 <* 
+    *> }                                                                              <*/
    /*---(defense)------------------------*/
    nd = yx11_yvikeys__desktop   (a_desk);
    DEBUG_DESK   yLOG_value   ("nd"        , nd);

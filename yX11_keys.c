@@ -257,7 +257,7 @@ yx11_keys__extended     (uchar a_ch)
                           /*---(special)-------------------*/
    case G_CHAR_STORAGE  : x_ch = ' '  ;  break;    /*    32   = 178 ²   */
    case G_CHAR_MASK     : x_ch = '*'  ;  break;    /*    42 * = 172 ¬   */
-   case G_CHAR_TAB      : x_ch = 't'  ;  break;    /*   116 t = 173 ­   */
+   /*> case G_CHAR_TAB      : x_ch = 't'  ;  break;    /+   116 t = 173 ­   +/        <*/
    case G_CHAR_SUMMARY  : x_ch = ':'  ;  break;    /*    58 : = 174 ®   */
    case G_CHAR_SYSTEM   : x_ch = '%'  ;  break;    /*    37 % = 175 ¯   */
                           /*---(delayed)-------------------*/
@@ -347,20 +347,20 @@ yx11_keys__extra        (uchar a_ch)
    /*---(defense)------------------------*/
    yx11_keys__reset ();
    switch (a_ch) {
-   case G_CHAR_BECAUSE    : x_ch = 't'  ;    break;
-   case G_CHAR_FOREACH    : x_ch = 'a'  ;    break;
-   case G_CHAR_EXISTS     : x_ch = 'e'  ;    break;
-   case G_CHAR_IMPLIES    : x_ch = 'i'  ;    break;
-   case G_CHAR_PROVES     : x_ch = 'p'  ;    break;
-   case G_CHAR_FORCES     : x_ch = 'f'  ;    break;
-   case G_CHAR_CONTRA     : x_ch = 'c'  ;    break;
-   case G_CHAR_UNION      : x_ch = 'j'  ;    break;
-   case G_CHAR_INTERSECT  : x_ch = 'k'  ;    break;
-   case G_CHAR_SUBSET     : x_ch = 'h'  ;    break;
-   case G_CHAR_SUPERSET   : x_ch = 'l'  ;    break;
-   case G_CHAR_MEMBER     : x_ch = 'm'  ;    break;
-   case G_CHAR_ONLYIF     : x_ch = 'o'  ;    break;
-   default : return rce;  break;
+   /*> case G_CHAR_BECAUSE    : x_ch = 't'  ;    break;                               <* 
+    *> case G_CHAR_FOREACH    : x_ch = 'a'  ;    break;                               <* 
+    *> case G_CHAR_EXISTS     : x_ch = 'e'  ;    break;                               <* 
+    *> case G_CHAR_IMPLIES    : x_ch = 'i'  ;    break;                               <* 
+    *> case G_CHAR_PROVES     : x_ch = 'p'  ;    break;                               <* 
+    *> case G_CHAR_FORCES     : x_ch = 'f'  ;    break;                               <* 
+    *> case G_CHAR_CONTRA     : x_ch = 'c'  ;    break;                               <* 
+    *> case G_CHAR_UNION      : x_ch = 'j'  ;    break;                               <* 
+    *> case G_CHAR_INTERSECT  : x_ch = 'k'  ;    break;                               <* 
+    *> case G_CHAR_SUBSET     : x_ch = 'h'  ;    break;                               <* 
+    *> case G_CHAR_SUPERSET   : x_ch = 'l'  ;    break;                               <* 
+    *> case G_CHAR_MEMBER     : x_ch = 'm'  ;    break;                               <* 
+    *> case G_CHAR_ONLYIF     : x_ch = 'o'  ;    break;                               <*/
+   /*> default : return rce;  break;                                                  <*/
    }
    yx11_keys__normal (x_ch);
    s_orig = a_ch;

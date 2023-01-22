@@ -2,6 +2,83 @@
 #include "yX11_priv.h"
 
 
+/*> 123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-   <*/
+
+#define   MAX_SIZES    10
+const static struct {
+   char        abbr;
+   char        desc        [LEN_LABEL];
+   short       wide;
+   short       tall;
+} s_sizes [MAX_SIZES] = {
+   /*---(talls)-----------------------------*/
+   { 'n', "editor"             ,  529,  733 },   /*  72 lines by 86 char wide          */
+   { 'p', "programmer"         ,  655,  733 },   /*  tags plus  80 char editing space  */
+   { 'm', "monster"            ,  895,  733 },   /*  tags plus 120 char editing space  */
+   /*---(rectangles)------------------------*/
+   { 'e', "eighth"             ,  529,  383 },
+   { 'w', "worker"             ,  619,  443 },   /*  the gyges demo size               */
+   { 'q', "quarter"            ,  805,  643 },
+   /*---(wides)-----------------------------*/
+   { 'h', "half"               , 1200,  444 },
+   { 'f', "full"               , 1366,  768 },
+   /*---(done)------------------------------*/
+   {  0 , "---end---"          ,    0,    0 },
+};
+
+
+#define   MAX_LOCNS    45
+const static struct {
+   char        abbr;
+   char        size;
+   char        desc        [LEN_LABEL];
+   short       left;
+   short       topp;
+} s_locns [MAX_LOCNS] = {
+   /*---(tall editor)-----------------------*/
+   { 'a', 'n', "far left"           ,   10,   10 },
+   { 'b', 'n', "mid left"           ,  280,   17 },
+   { 'd', 'n', "mid right"          ,  550,   24 },
+   { 'e', 'n', "far right"          ,  825,   30 },
+   /*---(tall programmer)-------------------*/
+   { 'a', 'p', "far left"           ,   10,   10 },
+   { 'b', 'p', "mid left"           ,  240,   17 },
+   { 'd', 'p', "mid right"          ,  470,   24 },
+   { 'e', 'p', "far right"          ,  700,   30 },
+   /*---(tall monster)----------------------*/
+   { 'a', 'm', "far left"           ,   10,   10 },
+   { 'c', 'm', "middle"             ,  220,   20 },
+   { 'e', 'm', "far right"          ,  440,   30 },
+   /*---(inner eighths)---------------------*/
+   { 'f', 'e', "inner north-west"   ,  150,  100 },
+   { 'g', 'e', "inner south-west"   ,  150,  300 },
+   { 'h', 'e', "inner north-east"   ,  675,  100 },
+   { 'i', 'e', "inner south-east"   ,  675,  300 },
+   /*---(outer eighths)---------------------*/
+   { 'j', 'e', "outer north-west"   ,   10,   10 },
+   { 'k', 'e', "outer south-west"   ,   10,  380 },
+   { 'l', 'e', "outer north-east"   ,  830,   10 },
+   { 'm', 'e', "outer south-east"   ,  830,  380 },
+   /*---(worker)----------------------------*/
+   { 'j', 'w', "north-west"         ,   70,  100 },
+   { 'k', 'w', "south-west"         ,   70,  300 },
+   { 'l', 'w', "north-east"         ,  675,  100 },
+   { 'm', 'w', "south-east"         ,  675,  300 },
+   /*---(quarters)--------------------------*/
+   { 'j', 'q', "north-west"         ,   10,   10 },
+   { 'k', 'q', "south-west"         ,   10,  115 },
+   { 'l', 'q', "north-east"         ,  550,   10 },
+   { 'm', 'q', "south-east"         ,  550,  115 },
+   /*---(horizontals)-----------------------*/
+   { 'w', 'h', "wide top"           ,   40,   10 },
+   { 'x', 'h', "wide middle"        ,   40,  160 },
+   { 'y', 'h', "wide bottom"        ,   40,  310 },
+   /*---(full)------------------------------*/
+   { 'z', 'f', "full screen"        ,    0,    0 },
+   /*---(done)------------------------------*/
+   {  0 , '-', "---end---"          ,    0,    0 },
+};
+
 
 #define    MAX_LOC      60
 const static struct {
@@ -75,6 +152,85 @@ const static struct {
 int            s_nloc  = 0;
 
 
+char
+yx11_loc_by_size        (short a_wide, short a_tall, char *r_desc)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   int         i           =    0;
+   /*---(default)------------------------*/
+   if (r_desc != NULL)  strlcpy (r_desc, "", LEN_LABEL);
+   /*---(walk structure)-----------------*/
+   for (i = 0; i < MAX_SIZES; ++i) {
+      /*---(end of list)-----------------*/
+      if (s_sizes [i].abbr  == 0)           break;
+      /*---(outside limits)--------------*/
+      if (s_sizes [i].wide + 30 <  a_wide)  continue;
+      if (s_sizes [i].wide - 30 >  a_wide)  continue;
+      if (s_sizes [i].tall + 30 <  a_tall)  continue;
+      if (s_sizes [i].tall - 30 >  a_tall)  continue;
+      /*---(appoximate match)------------*/
+      if (r_desc != NULL)  strlcpy (r_desc, s_sizes [i].desc, LEN_LABEL);
+      if (s_sizes [i].wide != a_wide)       return s_sizes [i].abbr;
+      if (s_sizes [i].tall != a_tall)       return s_sizes [i].abbr;
+      /*---(exact match)-----------------*/
+      return toupper (s_sizes [i].abbr);
+   }
+   /*---(complete)-----------------------*/
+   return '·';
+}
+
+char
+yx11_loc_by_locn        (char a_size, short a_left, short a_topp, char *r_desc, char *r_scrn)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   int         i           =    0;
+   char        x_size      =  '·';
+   char        x_abbr      =  '·';
+   char        x_scrn      =  '·';
+   /*---(header)-------------------------*/
+   DEBUG_DESK   yLOG_enter   (__FUNCTION__);
+   /*---(default)------------------------*/
+   if (r_desc != NULL)  strlcpy (r_desc, "", LEN_LABEL);
+   if (r_scrn != NULL)  *r_scrn = '·';
+   /*---(prepare)------------------------*/
+   x_size = tolower (a_size);
+   DEBUG_DESK   yLOG_char    ("x_size"    , x_size);
+   if (a_topp <  768) {
+      x_scrn = 't';
+   } else {
+      x_scrn = 'b';
+      a_topp -= 768;
+   }
+   if (r_scrn != NULL)  *r_scrn = x_scrn;
+   DEBUG_DESK   yLOG_char    ("x_scrn"    , x_scrn);
+   DEBUG_DESK   yLOG_value   ("a_left"    , a_left);
+   DEBUG_DESK   yLOG_value   ("a_topp"    , a_topp);
+   /*---(walk structure)-----------------*/
+   for (i = 0; i < MAX_LOCNS; ++i) {
+      /*---(end of list)-----------------*/
+      if (s_locns [i].abbr  == 0)      break;
+      DEBUG_DESK   yLOG_complex ("check"     , "%2d, %c %c %4d %4d", i, s_locns [i].abbr, s_locns [i].size, s_locns [i].left, s_locns [i].topp);
+      /*---(right size)------------------*/
+      if (s_locns [i].size  != x_size)      continue;
+      /*---(outside limits)--------------*/
+      if (s_locns [i].left + 30 <  a_left)  continue;
+      if (s_locns [i].left - 30 >  a_left)  continue;
+      if (s_locns [i].topp + 30 <  a_topp)  continue;
+      if (s_locns [i].topp - 30 >  a_topp)  continue;
+      DEBUG_DESK   yLOG_note    ("found at least an approximate match");
+      /*---(appoximate match)------------*/
+      if      (s_locns [i].left != a_left)  x_abbr = s_locns [i].abbr;
+      else if (s_locns [i].topp != a_topp)  x_abbr = s_locns [i].abbr;
+      else                                  x_abbr = toupper (s_locns [i].abbr);
+      /*---(save back)-------------------*/
+      if (r_desc != NULL)  strlcpy (r_desc, s_locns [i].desc, LEN_LABEL);
+      /*---(done)------------------------*/
+      break;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_DESK   yLOG_exit    (__FUNCTION__);
+   return x_abbr;
+}
 
 /*====================------------------------------------====================*/
 /*===----                       program level                          ----===*/
@@ -178,6 +334,7 @@ yx11_loc_sizing         (char a_abbr, char a_scrn, int *a_left, int *a_topp, int
    if (a_topp != NULL)  *a_topp = 0;
    if (a_wide != NULL)  *a_wide = 0;
    if (a_tall != NULL)  *a_tall = 0;
+   DEBUG_DESK   yLOG_enter   (__FUNCTION__);
    /*---(search)-------------------------*/
    for (i = 0; i < s_nloc; ++i) {
       /*---(filter)----------------------*/

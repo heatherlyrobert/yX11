@@ -296,12 +296,12 @@ yx11_yvikeys__desktop   (char a_desk)
       case '>' : a_desk = o + 1;                break;
       case ']' : a_desk = s_ndesk - 1;          break;
       case -1  :
-         DEBUG_DESK   yLOG_exit    (__FUNCTION__);
-         return a_desk;
-         break;
+                 DEBUG_DESK   yLOG_exit    (__FUNCTION__);
+                 return a_desk;
+                 break;
       default  :
-         DEBUG_DESK   yLOG_exitr   (__FUNCTION__, rce);
-         return rce;
+                 DEBUG_DESK   yLOG_exitr   (__FUNCTION__, rce);
+                 return rce;
 
       }
    }
@@ -417,6 +417,78 @@ char
 yX11_yvikeys_wintake    (uchar a_abbr, char d)
 {
    return yx11_yvikeys__winplay ('t', a_abbr, d, -1, -1, -1, -1);
+}
+
+char
+yX11_yvikeys_mydesk     (char d)
+{
+   char        rc          =    0;
+   long        x_win       =   -1;
+   char        x_desk      =    0;
+   x_win  = yX11_win_current  (NULL, NULL);
+   yX11_desk_goto     (d);
+   yx11_loc_exact     (x_win, d, -1, -1, -1, -1);
+   yx11_win__activate (x_win, d);
+   return rc;
+}
+
+char
+yX11_yvikeys_myhome     (int x, int y)
+{
+   char        rc          =    0;
+   long        x_win       =   -1;
+   int         nx          =    0;
+   int         ny          =    0;
+   char        x_tries     =    0;
+   x_win  = yX11_win_current  (NULL, NULL);
+   while (x != nx || y != ny)  {
+      rc = yX11_win_exact (x_win, -1, x, y, -1, -1);
+      usleep (100000);  /* appears to have a update/caching delay */
+      yx11_desk_inventory ('y');
+      rc = yX11_win_where (x_win, NULL, &nx, &ny, NULL, NULL);
+      if (++x_tries > 3)  break;
+   }
+   return rc;
+}
+
+char
+yX11_yvikeys_mysize     (int w, int t)
+{
+   char        rc          =    0;
+   long        x_win       =   -1;
+   int         nw          =    0;
+   int         nt          =    0;
+   char        x_tries     =    0;
+   x_win  = yX11_win_current  (NULL, NULL);
+   while (w != nw || t != nt)  {
+      rc = yX11_win_exact (x_win, -1, -1, -1, w, t);
+      usleep (100000);  /* appears to have a update/caching delay */
+      yx11_desk_inventory ('y');
+      rc = yX11_win_where (x_win, NULL, NULL, NULL, &nw, &nt);
+      if (++x_tries > 3)  break;
+   }
+   return rc;
+}
+
+char
+yX11_yvikeys_mysizer    (int w, int t, int m, int s)
+{
+   char        rc          =    0;
+   long        x_win       =   -1;
+   int         ow          =    0;
+   int         ot          =    0;
+   int         i           =    0;
+   int         nw          =    0;
+   int         nt          =    0;
+   x_win  = yX11_win_current  (NULL, NULL);
+   rc = yX11_win_where (x_win, NULL, NULL, NULL, &ow, &ot);
+   for (i = 1; i <= s; ++i) {
+      nw = w + (w - ow) / s;
+      nt = t + (t - ot) / s;
+      rc = yX11_yvikeys_mysize (nw, nt);
+      usleep (1000 * m);
+   }
+   return rc;
 }
 
 

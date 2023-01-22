@@ -8,9 +8,9 @@ NAME_BASE  = yX11
 # additional standard and outside libraries
 LIB_STD    = -lX11 -lGL -lm
 # all heatherly libraries used, debug versions whenever available
-LIB_MINE   = -lySTR_debug -lyREGEX_debug
+LIB_MINE   = -lySTR_debug -lyEXEC_debug -lyREGEX_debug
 # directory for production code, no trailing slash
-INST_DIR   = 
+INST_DIR   = /usr/local/bin
 
 
 
@@ -18,9 +18,9 @@ INST_DIR   =
 # extra include directories required
 INC_MINE   = 
 # utilities generated, separate from main program
-NAME_UTIL  = 
+NAME_UTIL  = wtop
 # libraries only for the utilities
-LIB_UTIL   = 
+LIB_UTIL   = -lySTR_debug -lyEXEC_debug -lyREGEX_debug
 
 
 

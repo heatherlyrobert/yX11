@@ -95,7 +95,10 @@ yX11_opengl__create      (void)
 char
 yX11_opengl__destroy    (void)
 {
+   /*---(header)-------------------------*/
+   DEBUG_DESK   yLOG_enter   (__FUNCTION__);
    glXDestroyContext(YX_DISP, GCON);
+   DEBUG_DESK   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 

@@ -11,25 +11,33 @@
 
 #define     P_FOCUS     "RS (run-time support)"
 #define     P_NICHE     "xw (x-windows)"
+#define     P_SUBJECT   "desktop and window control"
 #define     P_PURPOSE   "provide consistent and simple X11/OpenGL setup/teardown"
 
-#define     P_NAMESAKE  "terpsichore"
-#define     P_HERITAGE  "greek muse of dance and chorus"
-#define     P_IMAGERY   "beautiful woman sitting with a lyre"
-#define     P_REASON    "the most complicated system dance is coordinating graphics"
+#define     P_NAMESAKE  "melpomene-mousai (muse of drama)"
+#define     P_HERITAGE  ""
+#define     P_IMAGERY   ""
+#define     P_REASON    ""
+
+#define     P_ONELINE   P_NAMESAKE " " P_SUBJECT
+
+#define     P_BASENAME  ""
+#define     P_FULLPATH  ""
+#define     P_SUFFIX    ""
+#define     P_CONTENT   ""
 
 #define     P_SYSTEM    "gnu/linux   (powerful, ubiquitous, technical, and hackable)"
 #define     P_LANGUAGE  "ansi-c      (wicked, limitless, universal, and everlasting)"
 #define     P_CODESIZE  "small       (less than 1,000 slocl)"
+#define     P_DEPENDS   "xlib/glx"
 
 #define     P_AUTHOR    "heatherlyrobert"
 #define     P_CREATED   "2009-05"
-#define     P_DEPENDS   "xlib/glx"
 
 #define     P_VERMAJOR  "1.--  working for everyday use, evolving but stable"
 #define     P_VERMINOR  "1.1-  adding desktop control for zeus and scripting"
-#define     P_VERNUM    "1.1c"
-#define     P_VERTXT    "created windowing and keystroke functions for kairos"
+#define     P_VERNUM    "1.1d"
+#define     P_VERTXT    "updated to yURG_by_name after yURG change"
 
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -104,6 +112,7 @@
 #include    <stdlib.h>       /* C_ANSI : exit                                 */
 #include    <memory.h>       /* C_ANSI : malloc                               */
 #include    <sys/time.h>     /* C_UNIX : gettimeofday                         */
+#include    <dirent.h>
 
 
 /*===[[ GLX HEADERS ]]========================================================*/
@@ -116,6 +125,8 @@
 #include    <yLOG.h>         /* CUSTOM : heatherly program logging            */
 #include    <ySTR.h>         /* CUSTOM : heatherly string handling            */
 #include    <yREGEX.h>       /* CUSTOM : heatherly regular expressions        */
+#include    <yEXEC.h>        /* CUSTOM : heatherly process execution          */
+#include    <yDLST_solo.h>
 
 
 /*===[[ TYPEDEFS ]]===========================================================*/
@@ -124,6 +135,14 @@ typedef    unsigned int  uint;
 typedef    unsigned char uchar;
 
 extern char   unit_answer [LEN_RECD];
+
+/*> extern Display       *YX_DISP;                                                    <* 
+ *> extern int            YX_SCRN;                                                    <* 
+ *> extern Window         YX_BASE;                                                    <* 
+ *> extern Window         YX_ROOT;                                                    <* 
+ *> extern Window         YX_FOCU;                                                    <* 
+ *> extern XEvent         YX_EVNT;                                                    <* 
+ *> extern XKeyEvent      YX_SKEY;                                                    <*/
 
 /*===[[ GLOBALS ]]============================================================*/
 struct cXINIT   {
@@ -209,7 +228,6 @@ char        yx11_desk_init          (void);
 /*---(inventory)------------*/
 char        yx11_desk_inventory     (char a_real);
 char        yx11_full_refresh       (char a_real);
-
 char*       yX11__unit_desk         (char *a_question, int a_num);
 
 
@@ -223,7 +241,7 @@ char        yx11_win_inventory      (char a_real);
 char        yx11_win_current        (char a_real);
 char        yx11_win__activate      (long a_win, char a_desk);
 char        yx11_win__verify        (long a_win);
-long        yx11_win__regex         (char *a_regex, char *a_name, int *a_count);
+long        yx11_win__regex         (char *a_regex, char *r_name, int *r_count);
 char*       yX11__unit_win          (char *a_question, long a_num);
 
 
@@ -234,6 +252,8 @@ char*       yX11__unit_keys         (char *a_question, int a_num);
 char        yx11__unit_keys_read    (void);
 
 
+char        yx11_loc_by_size        (short a_wide, short a_tall, char *r_desc);
+char        yx11_loc_by_locn        (char a_size, short a_left, short a_topp, char *r_desc, char *r_scrn);
 char        yx11_loc_init           (void);
 char        yx11_loc_sizing         (char a_abbr, char a_scrn, int *a_left, int *a_topp, int *a_wide, int *a_tall);
 char*       yX11__unit_loc          (char *a_question, int a_num, char a_scrn);
@@ -243,5 +263,8 @@ char        yx11_yvikeys_valid      (uchar a_abbr);
 char        yx11_yvikeys__desktop   (char a_desk);
 char*       yX11__unit_yvikeys      (char *a_question, int a_num);
 
+
+
+char        yx11_proc_gather        (void);
 #endif
 
