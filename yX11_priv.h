@@ -36,8 +36,8 @@
 
 #define     P_VERMAJOR  "1.--  working for everyday use, evolving but stable"
 #define     P_VERMINOR  "1.1-  adding desktop control for zeus and scripting"
-#define     P_VERNUM    "1.1d"
-#define     P_VERTXT    "updated to yURG_by_name after yURG change"
+#define     P_VERNUM    "1.1e"
+#define     P_VERTXT    "updated ySTR functions to ¶ystr¶ prefix"
 
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -118,7 +118,6 @@
 /*===[[ GLX HEADERS ]]========================================================*/
 #include <GL/gl.h>                   /* main header for opengl                */
 #include <GL/glx.h>                  /* for xlib/opengl integration           */
-
 
 /*===[[ CLIB HEADERS ]]=======================================================*/
 #include    <yURG.h>         /* CUSTOM : heatherly urgent processing          */

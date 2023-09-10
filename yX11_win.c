@@ -147,7 +147,7 @@ yx11_win_inventory      (char a_real)
       DEBUG_DESK   yLOG_complex ("x_recd"    , "%d) %2d[%s]", s_nwin, x_len, x_recd);
       if (x_len < 20)  continue;
       p = strtok_r (x_recd, q, &r);
-      strl2hex (p, &x_val, LEN_LABEL);
+      ystrl2hex (p, &x_val, LEN_LABEL);
       s_wins [s_nwin].id = x_val;
       DEBUG_DESK   yLOG_value   ("id"        , s_wins [s_nwin].id);
       p = strtok_r (NULL  , q, &r);
@@ -165,8 +165,8 @@ yx11_win_inventory      (char a_real)
       p = strtok_r (NULL  , q, &r);
       x_len = strlen (p);
       p += x_len + 1;
-      strltrim (p, ySTR_BOTH, LEN_RECD);
-      strlcpy (s_wins [s_nwin].title, p, LEN_FULL);
+      ystrltrim (p, ySTR_BOTH, LEN_RECD);
+      ystrlcpy (s_wins [s_nwin].title, p, LEN_FULL);
       s_wins [s_nwin].type =  yx11_win__type (p);
       s_wins [s_nwin].size =  yx11_loc_by_size (s_wins [s_nwin].wide, s_wins [s_nwin].tall, NULL);
       s_wins [s_nwin].locn =  yx11_loc_by_locn (s_wins [s_nwin].size, s_wins [s_nwin].left, s_wins [s_nwin].topp, NULL, &(s_wins [s_nwin].scrn));
@@ -224,7 +224,7 @@ yx11_win_current        (char a_real)
    DEBUG_DESK   yLOG_info    ("p"         , p);
    p = strtok_r (NULL  , q, &r);
    DEBUG_DESK   yLOG_info    ("p"         , p);
-   strl2hex (p, &x_val, LEN_LABEL);
+   ystrl2hex (p, &x_val, LEN_LABEL);
    x_id = x_val;
    DEBUG_DESK   yLOG_value   ("x_id"      , x_id);
    /*---(close)--------------------------*/
@@ -261,7 +261,7 @@ yX11_win_current        (char *a_name, char *a_desk)
    /*---(header)-------------------------*/
    DEBUG_DESK   yLOG_enter   (__FUNCTION__);
    /*---(prepare)------------------------*/
-   if (a_name != NULL)  strlcpy (a_name, "", LEN_LABEL);
+   if (a_name != NULL)  ystrlcpy (a_name, "", LEN_LABEL);
    if (a_desk != NULL)  *a_desk = -1;
    yx11_full_refresh  ('y');
    DEBUG_DESK   yLOG_value   ("s_nwin"    , s_nwin);
@@ -272,7 +272,7 @@ yX11_win_current        (char *a_name, char *a_desk)
       if (s_wins [i].curr != '*')  continue;
       /*---(found)-----------------------*/
       DEBUG_DESK   yLOG_note    ("FOUND");
-      if (a_name != NULL)  strlcpy (a_name, s_wins [i].title, LEN_LABEL);
+      if (a_name != NULL)  ystrlcpy (a_name, s_wins [i].title, LEN_LABEL);
       if (a_desk != NULL)  *a_desk = s_wins [i].desk;
       DEBUG_DESK   yLOG_exit    (__FUNCTION__);
       return s_wins [i].id;
@@ -300,7 +300,7 @@ yX11_win_by_name        (char a_move, long *r_id, char *r_desk, char *r_title, c
    /*---(prepare)------------------------*/
    if (r_id    != NULL)  *r_id   = -1;
    if (r_desk  != NULL)  *r_desk = -1;
-   if (r_title != NULL)  strlcpy (r_title, "", LEN_FULL);
+   if (r_title != NULL)  ystrlcpy (r_title, "", LEN_FULL);
    if (r_type  != NULL)  *r_type = '·';
    if (r_curr  != NULL)  *r_curr = '·';
    if (r_left  != NULL)  *r_left = -1;
@@ -355,7 +355,7 @@ yX11_win_by_name        (char a_move, long *r_id, char *r_desk, char *r_title, c
    /*---(save-back)----------------------*/
    if (r_id    != NULL)  *r_id   = s_wins [n].id;
    if (r_desk  != NULL)  *r_desk = s_wins [n].desk;
-   if (r_title != NULL)  strlcpy (r_title, s_wins [n].title, LEN_FULL);
+   if (r_title != NULL)  ystrlcpy (r_title, s_wins [n].title, LEN_FULL);
    if (r_type  != NULL)  *r_type = s_wins [n].type;
    if (r_curr  != NULL)  *r_curr = s_wins [n].curr;
    if (r_left  != NULL)  *r_left = s_wins [n].left;
@@ -450,7 +450,7 @@ yx11_win__regex         (char *a_regex, char *r_name, int *r_count)
    DEBUG_DESK   yLOG_enter   (__FUNCTION__);
    DEBUG_DESK   yLOG_complex ("args"      , "%p, %p, %p", a_regex, r_name, r_count);
    /*---(prepare)------------------------*/
-   if (r_name  != NULL)  strlcpy (r_name, "", LEN_FULL);
+   if (r_name  != NULL)  ystrlcpy (r_name, "", LEN_FULL);
    if (r_count != NULL)  *r_count = 0;
    /*---(defense)------------------------*/
    --rce;  if (a_regex == NULL || strlen (a_regex) == 0) {
@@ -477,7 +477,7 @@ yx11_win__regex         (char *a_regex, char *r_name, int *r_count)
       DEBUG_DESK   yLOG_note    ("FOUND");
       ++c;
       if (c == 1) {
-         if (r_name != NULL)  strlcpy (r_name, s_wins [n].title, LEN_FULL);
+         if (r_name != NULL)  ystrlcpy (r_name, s_wins [n].title, LEN_FULL);
          n = i;
       }
    }
@@ -718,7 +718,7 @@ yX11__unit_win          (char *a_question, long a_num)
    char        s           [LEN_RECD]  = "";
    int         n           =    0;
    /*---(initialize)---------------------*/
-   strlcpy (unit_answer, "WIN unit         : unknown request", LEN_RECD);
+   ystrlcpy (unit_answer, "WIN unit         : unknown request", LEN_RECD);
    yx11_full_refresh ('y');
    /*---(string testing)-----------------*/
    if      (strncmp (a_question, "count"     , 20)  == 0) {

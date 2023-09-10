@@ -459,7 +459,7 @@ yX11_keys_send          (long a_window, uchar *a_keys)
       if (s_slash == 2)  yx11_keys__sendone (a_window, "·y····", XK_l);
       yx11_keys__sendone (a_window, s_mods, s_long);
       yx11_keys__reset ();
-      strlcpy (s_mods, "······", LEN_TERSE);
+      ystrlcpy (s_mods, "······", LEN_TERSE);
       s_protect = 0;
    }
    DEBUG_DESK   yLOG_exit    (__FUNCTION__);
@@ -491,7 +491,7 @@ yX11__unit_keys         (char *a_question, int a_num)
    char        t           [LEN_RECD ];
    int         i           =    0;
    /*---(initialize)---------------------*/
-   strlcpy (unit_answer, "KEYS unit        : unknown request", LEN_RECD);
+   ystrlcpy (unit_answer, "KEYS unit        : unknown request", LEN_RECD);
    /*---(string testing)-----------------*/
    if      (strncmp (a_question, "symkey"  , 20)  == 0) {
       snprintf (unit_answer, LEN_RECD, "KEYS symkey      : orig %c/%-3d, char %c/%-3d, sym %-8d, slash %d, mods %-6.6s", s_orig, (uchar) s_orig, s_char, (uchar) s_char, s_long, s_slash, s_mods);

@@ -147,8 +147,8 @@ yx11_desk_inventory     (char a_real)
       s_desks [s_ndesk].tall = atoi (p);
       x_len = strlen (p);
       p += x_len + 1;
-      strltrim (p, ySTR_BOTH, LEN_DESC);
-      strlcpy (s_desks [s_ndesk].label, p, LEN_LABEL);
+      ystrltrim (p, ySTR_BOTH, LEN_DESC);
+      ystrlcpy (s_desks [s_ndesk].label, p, LEN_LABEL);
       DEBUG_DESK   yLOG_complex ("result"    , "%d %c %-10.10s %4d %4d", s_desks [s_ndesk].id, s_desks [s_ndesk].curr, s_desks [s_ndesk].label, s_desks [s_ndesk].wide, s_desks [s_ndesk].tall);
       ++s_ndesk;
    }
@@ -190,7 +190,7 @@ yX11_desk_current       (char *r_name)
    /*---(header)-------------------------*/
    DEBUG_DESK   yLOG_enter   (__FUNCTION__);
    /*---(prepare)------------------------*/
-   if (r_name != NULL)  strlcpy (r_name, "", LEN_LABEL);
+   if (r_name != NULL)  ystrlcpy (r_name, "", LEN_LABEL);
    yx11_full_refresh  ('y');
    DEBUG_DESK   yLOG_value   ("s_ndesk"   , s_ndesk);
    /*---(search)-------------------------*/
@@ -200,7 +200,7 @@ yX11_desk_current       (char *r_name)
       if (s_desks [i].curr != '*')  continue;
       /*---(found)-----------------------*/
       DEBUG_DESK   yLOG_note    ("FOUND");
-      if (r_name != NULL)  strlcpy (r_name, s_desks [i].label, LEN_LABEL);
+      if (r_name != NULL)  ystrlcpy (r_name, s_desks [i].label, LEN_LABEL);
       DEBUG_DESK   yLOG_exit    (__FUNCTION__);
       return i;
    }
@@ -225,7 +225,7 @@ yx11_desktop__cursor    (char a_action, char a_move, char *r_name)
    DEBUG_DESK   yLOG_enter   (__FUNCTION__);
    DEBUG_DESK   yLOG_complex ("args"      , "%c, %d, %p", a_action, a_move, r_name);
    /*---(prepare)------------------------*/
-   if (r_name != NULL)  strlcpy (r_name, "", LEN_LABEL);
+   if (r_name != NULL)  ystrlcpy (r_name, "", LEN_LABEL);
    o  = yX11_desk_current (x_orig); /* never assume, update */
    if (a_action == 'y')  n = o;
    DEBUG_DESK   yLOG_value   ("current"   , n);
@@ -290,7 +290,7 @@ yx11_desktop__cursor    (char a_action, char a_move, char *r_name)
    if (a_action == 'y') {
       /*---(shortcut for no move)--------*/
       if (n == o) {
-         if (r_name != NULL)  strlcpy (r_name, x_orig, LEN_LABEL);
+         if (r_name != NULL)  ystrlcpy (r_name, x_orig, LEN_LABEL);
          DEBUG_DESK   yLOG_exit    (__FUNCTION__);
          return o;
       }
@@ -308,7 +308,7 @@ yx11_desktop__cursor    (char a_action, char a_move, char *r_name)
       /*---(update current)-----------------*/
       DEBUG_DESK   yLOG_value   ("current"   , n);
    } else {
-      if (r_name != NULL)  strlcpy (r_name, s_desks [n].label, LEN_LABEL);
+      if (r_name != NULL)  ystrlcpy (r_name, s_desks [n].label, LEN_LABEL);
    }
    /*---(complete)-----------------------*/
    DEBUG_DESK   yLOG_exit    (__FUNCTION__);
@@ -342,7 +342,7 @@ yx11_desktop__regex     (char a_action, char *a_regex, char *a_name, int *a_coun
    DEBUG_DESK   yLOG_enter   (__FUNCTION__);
    DEBUG_DESK   yLOG_complex ("args"      , "%c, %p, %p, %p", a_action, a_regex, a_name, a_count);
    /*---(prepare)------------------------*/
-   if (a_name  != NULL)  strlcpy (a_name, "", LEN_LABEL);
+   if (a_name  != NULL)  ystrlcpy (a_name, "", LEN_LABEL);
    if (a_count != NULL)  *a_count = 0;
    /*---(defense)------------------------*/
    --rce;  if (a_regex == NULL || strlen (a_regex) == 0) {
@@ -370,7 +370,7 @@ yx11_desktop__regex     (char a_action, char *a_regex, char *a_name, int *a_coun
       DEBUG_DESK   yLOG_note    ("FOUND");
       ++c;
       if (c == 1) {
-         if (a_name != NULL)  strlcpy (a_name, s_desks [n].label, LEN_LABEL);
+         if (a_name != NULL)  ystrlcpy (a_name, s_desks [n].label, LEN_LABEL);
          if (a_action == 'y') n = yX11_desk_goto (i);
          else                 n = i;
       }
@@ -406,16 +406,16 @@ yX11__unit_desk         (char *a_question, int a_num)
    char        t           [LEN_RECD ];
    int         i           =    0;
    /*---(initialize)---------------------*/
-   strlcpy (unit_answer, "DESK unit        : unknown request", LEN_RECD);
+   ystrlcpy (unit_answer, "DESK unit        : unknown request", LEN_RECD);
    yx11_full_refresh ('y');
    /*---(string testing)-----------------*/
    if      (strncmp (a_question, "count"   , 20)  == 0) {
-      strlcpy (t, "", LEN_RECD);
+      ystrlcpy (t, "", LEN_RECD);
       for (i = 0; i < MAX_DESK; ++i) {
          if (i < s_ndesk)  sprintf (s, "%2d", s_desks [i].id);
          else              sprintf (s, " -");
-         if (i > 0)  strlcat (t, " ", LEN_RECD);
-         strlcat (t, s  , LEN_RECD);
+         if (i > 0)  ystrlcat (t, " ", LEN_RECD);
+         ystrlcat (t, s  , LEN_RECD);
       }
       snprintf (unit_answer, LEN_RECD, "DESK count       : %2d %s", s_ndesk, t);
    }

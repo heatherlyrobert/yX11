@@ -158,7 +158,7 @@ yx11_loc_by_size        (short a_wide, short a_tall, char *r_desc)
    /*---(locals)-----------+-----+-----+-*/
    int         i           =    0;
    /*---(default)------------------------*/
-   if (r_desc != NULL)  strlcpy (r_desc, "", LEN_LABEL);
+   if (r_desc != NULL)  ystrlcpy (r_desc, "", LEN_LABEL);
    /*---(walk structure)-----------------*/
    for (i = 0; i < MAX_SIZES; ++i) {
       /*---(end of list)-----------------*/
@@ -169,7 +169,7 @@ yx11_loc_by_size        (short a_wide, short a_tall, char *r_desc)
       if (s_sizes [i].tall + 30 <  a_tall)  continue;
       if (s_sizes [i].tall - 30 >  a_tall)  continue;
       /*---(appoximate match)------------*/
-      if (r_desc != NULL)  strlcpy (r_desc, s_sizes [i].desc, LEN_LABEL);
+      if (r_desc != NULL)  ystrlcpy (r_desc, s_sizes [i].desc, LEN_LABEL);
       if (s_sizes [i].wide != a_wide)       return s_sizes [i].abbr;
       if (s_sizes [i].tall != a_tall)       return s_sizes [i].abbr;
       /*---(exact match)-----------------*/
@@ -190,7 +190,7 @@ yx11_loc_by_locn        (char a_size, short a_left, short a_topp, char *r_desc, 
    /*---(header)-------------------------*/
    DEBUG_DESK   yLOG_enter   (__FUNCTION__);
    /*---(default)------------------------*/
-   if (r_desc != NULL)  strlcpy (r_desc, "", LEN_LABEL);
+   if (r_desc != NULL)  ystrlcpy (r_desc, "", LEN_LABEL);
    if (r_scrn != NULL)  *r_scrn = '·';
    /*---(prepare)------------------------*/
    x_size = tolower (a_size);
@@ -223,7 +223,7 @@ yx11_loc_by_locn        (char a_size, short a_left, short a_topp, char *r_desc, 
       else if (s_locns [i].topp != a_topp)  x_abbr = s_locns [i].abbr;
       else                                  x_abbr = toupper (s_locns [i].abbr);
       /*---(save back)-------------------*/
-      if (r_desc != NULL)  strlcpy (r_desc, s_locns [i].desc, LEN_LABEL);
+      if (r_desc != NULL)  ystrlcpy (r_desc, s_locns [i].desc, LEN_LABEL);
       /*---(done)------------------------*/
       break;
    }
@@ -448,7 +448,7 @@ yX11__unit_loc          (char *a_question, int a_num, char a_scrn)
    /*---(locals)-----------+-----+-----+-*/
    int         n           =    0;
    /*---(initialize)---------------------*/
-   strlcpy (unit_answer, "LOC unit         : unknown request", LEN_RECD);
+   ystrlcpy (unit_answer, "LOC unit         : unknown request", LEN_RECD);
    /*---(string testing)-----------------*/
    yx11_full_refresh ('y');
    if      (strncmp (a_question, "entry"     , 20)  == 0) {

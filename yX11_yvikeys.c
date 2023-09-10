@@ -506,7 +506,7 @@ yX11__unit_yvikeys      (char *a_question, int a_num)
    char        t           [LEN_RECD ];
    int         i           =    0;
    /*---(initialize)---------------------*/
-   strlcpy (unit_answer, "YVIKEYS unit     : unknown request", LEN_RECD);
+   ystrlcpy (unit_answer, "YVIKEYS unit     : unknown request", LEN_RECD);
    yx11_full_refresh ('y');
    /*---(string testing)-----------------*/
    if      (strncmp (a_question, "count"   , 20)  == 0) {
