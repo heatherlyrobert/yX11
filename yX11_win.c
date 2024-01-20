@@ -128,7 +128,10 @@ yx11_win_inventory      (char a_real)
    /*---(initialize)---------------------*/
    yx11_win_purge  ();
    /*---(generate data)------------------*/
-   if (a_real == 'y')  rc = system ("wmctrl -G -l > /tmp/yX11_windows.txt");
+   if (a_real == 'y') {
+      system ("chmod 0666 /tmp/yX11_windows.txt 2>&1  > /dev/null");
+      rc = system ("wmctrl -G -l > /tmp/yX11_windows.txt");
+   }
    /*---(open)---------------------------*/
    f = fopen ("/tmp/yX11_windows.txt", "rt");
    DEBUG_DESK   yLOG_point   ("fopen"     , f);
@@ -205,6 +208,7 @@ yx11_win_current        (char a_real)
    DEBUG_DESK   yLOG_enter   (__FUNCTION__);
    /*---(generate data)------------------*/
    if (a_real == 'y') {
+      system ("chmod 0666 /tmp/yX11_active.txt 2>&1  > /dev/null");
       rc = system ("xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW > /tmp/yX11_active.txt");
       system ("echo \"\n\" >> /tmp/yX11_active.txt");
    }
@@ -283,7 +287,7 @@ yX11_win_current        (char *a_name, char *a_desk)
 }
 
 char
-yX11_win_by_name        (char a_move, long *r_id, char *r_desk, char *r_title, char *r_type, char *r_curr, short *r_left, short *r_topp, char *r_scrn, char *r_locn, short *r_wide, short *r_tall, char *r_size)
+yX11_win_by_cursor      (char a_move, long *r_id, char *r_desk, char *r_title, char *r_type, char *r_curr, short *r_left, short *r_topp, char *r_scrn, char *r_locn, short *r_wide, short *r_tall, char *r_size)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;

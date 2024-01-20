@@ -199,146 +199,227 @@ yx11_keys__reset        (void)
 }
 
 char
+yx11_keys__control      (uchar a_ch)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   int         i           =    0;
+   long        c           =    0;
+   /*---(reset)--------------------------*/
+   yx11_keys__reset ();
+   /*---(quick-out)----------------------*/
+   if (a_ch >= 32)   return 0;
+   /*---(header)-------------------------*/
+   DEBUG_DESK   yLOG_enter   (__FUNCTION__);
+   /*---(handle controls)----------------*/
+   switch (a_ch) {
+   case (uchar) '\n' :
+      DEBUG_DESK   yLOG_note    ("true return");
+      c  = 0xff0d;
+      break;
+   case (uchar) '\e' :
+      DEBUG_DESK   yLOG_note    ("true escape");
+      c  = 0xff1b;
+      break;
+   case (uchar) '\b' :
+      DEBUG_DESK   yLOG_note    ("true backspace");
+      c  = 0xff08;
+      break;
+   case (uchar) '' :
+      DEBUG_DESK   yLOG_note    ("ascii field");
+      c  = 0xff08;
+      break;
+   default :
+      DEBUG_DESK   yLOG_note    ("no match found");
+      DEBUG_DESK   yLOG_exit    (__FUNCTION__);
+      return 0;
+   }
+   /*---(saveback)-----------------------*/
+   DEBUG_DESK   yLOG_value   ("c"         , c);
+   s_orig = s_char = a_ch;
+   s_long = c;
+   /*---(complete)-----------------------*/
+   DEBUG_DESK   yLOG_exit    (__FUNCTION__);
+   return 1;
+}
+
+char
 yx11_keys__normal         (uchar a_ch)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    int         i           =    0;
-   /*---(defense)------------------------*/
+   long        c           =    0;
+   /*---(reset)--------------------------*/
    yx11_keys__reset ();
-   s_orig = s_char = a_ch;
-   --rce;  if (a_ch < 32 || a_ch >= 127)   return rce;
+   /*---(quick-out)----------------------*/
+   if (a_ch < 32 || a_ch >= 127)   return 0;
+   /*---(header)-------------------------*/
+   DEBUG_DESK   yLOG_enter   (__FUNCTION__);
    /*---(find)---------------------------*/
    for (i = 0; i < MAX_KEYS; ++i) {
       if (s_keys [i].norm == -1)  break;
       if (s_keys [i].norm == a_ch) {
-         return s_long = s_keys [i].keysym;
+         DEBUG_DESK   yLOG_note    ("normal key");
+         c = s_keys [i].keysym;
       }
       if (s_keys [i].shft == a_ch) {
+         DEBUG_DESK   yLOG_note    ("shifted key");
          s_mods [S_SHFT] = 'y';
-         return s_long = s_keys [i].keysym;
+         c = s_keys [i].keysym;
       }
       if (s_keys [i].mode == a_ch) {
+         DEBUG_DESK   yLOG_note    ("moded key");
          s_mods [S_MODE] = 'y';
-         return s_long = s_keys [i].keysym;
+         c = s_keys [i].keysym;
       }
    }
-   return s_long = 0;
+   /*---(trouble)------------------------*/
+   DEBUG_DESK   yLOG_value   ("c"         , c);
+   if (c == 0) {
+      DEBUG_DESK   yLOG_note    ("match not found");
+      DEBUG_DESK   yLOG_exit    (__FUNCTION__);
+      return 0;
+   }
+   /*---(saveback)-----------------------*/
+   s_orig = s_char = a_ch;
+   s_long = c;
+   /*---(complete)-----------------------*/
+   DEBUG_DESK   yLOG_exit    (__FUNCTION__);
+   return 1;
 }
 
 /*> ,x··23|··ve··d··9|··P··a              : x_ch = ¥··25|··dw··f:··r;··l··v··f;··d··n··,y   <*/
 
 char
-yx11_keys__extended     (uchar a_ch)
+yx11_keys__slashed      (uchar a_ch)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
+   char        rc          =    0;
    int         i           =    0;
-   char        x_ch        =    0;
-   /*---(defense)------------------------*/
+   char        c           =  '·';
+   char        x_slash     =    0;
+   char        x_base      =    0;
+   /*---(reset)--------------------------*/
    yx11_keys__reset ();
-   switch (a_ch) {
-   case G_CHAR_REXCLAM  : x_ch = '!'  ;  break;    /*    33 ! = 161 ¡   */
-   case G_CHAR_RQUEST   : x_ch = '?'  ;  break;    /*    63 ? = 162 ¢   */
-                          /*---(hidden)--------------------*/
-   case G_CHAR_NULL     : x_ch = '0'  ;  break;    /*    48 0 = 163 £   */
-   case G_CHAR_PLACE    : x_ch = 'p'  ;  break;    /*   112 p = 164 ¤   */
-   case G_CHAR_ESCAPE   : x_ch = 'e'  ;  break;    /*   101 e = 165 ¥   */
-   case G_CHAR_RETURN   : x_ch = 'n'  ;  break;    /*   110 n = 166 ¦   */
-   case G_CHAR_FIELD    : x_ch = 'f'  ;  break;    /*   102 f = 167 §   */
-   case G_CHAR_GROUP    : x_ch = 'g'  ;  break;    /*   103 g = 168 ¨   */
-                          /*---(macro)---------------------*/
-   case G_CHAR_DISPLAY  : x_ch = '+'  ;  break;    /*    43 + = 169 ©   */
-   case G_CHAR_BREAK    : x_ch = '.'  ;  break;    /*    46 . = 170 ª   */
-   case G_CHAR_WAIT     : x_ch = ','  ;  break;    /*    44 , = 171 «   */
-   case G_CHAR_HALT     : x_ch = 'q'  ;  break;    /*   113 q = 179 ³   */
-   case G_CHAR_BIGDOT   : x_ch = '\'' ;  break;    /*    39 ' = 207 ´   */
-   case G_CHAR_HUGEDOT  : x_ch = '@'  ;  break;    /*    64 @ = 180 Ï   */
-                          /*---(special)-------------------*/
-   case G_CHAR_STORAGE  : x_ch = ' '  ;  break;    /*    32   = 178 ²   */
-   case G_CHAR_MASK     : x_ch = '*'  ;  break;    /*    42 * = 172 ¬   */
-   /*> case G_CHAR_TAB      : x_ch = 't'  ;  break;    /+   116 t = 173 ­   +/        <*/
-   case G_CHAR_SUMMARY  : x_ch = ':'  ;  break;    /*    58 : = 174 ®   */
-   case G_CHAR_SYSTEM   : x_ch = '%'  ;  break;    /*    37 % = 175 ¯   */
-                          /*---(delayed)-------------------*/
-   case G_CHAR_DBSLASH  : x_ch = '\\' ;  break;    /*    92 \ = 181 µ   */
-   case G_CHAR_DDQUOTE  : x_ch = '"'  ;  break;    /*    34 " = 182 ¶   */
-   case G_CHAR_SPACE    : x_ch = 's'  ;  break;    /*   115 s = 183 ·   */
-                          /*---(grouping)------------------*/
-   case G_CHAR_SLPAREN  : x_ch = '('  ;  break;    /*    40 ( = 184 ¸   */
-   case G_CHAR_SRPAREN  : x_ch = ')'  ;  break;    /*    41 ) = 185 ¹   */
-   case G_CHAR_SLBRACK  : x_ch = '['  ;  break;    /*    91 [ = 186 º   */
-   case G_CHAR_SRBRACK  : x_ch = ']'  ;  break;    /*    93 ] = 187 »   */
-   case G_CHAR_SLCHEV   : x_ch = '{'  ;  break;    /*   123 { = 188 ¼   */
-   case G_CHAR_SRCHEV   : x_ch = '}'  ;  break;    /*   125 } = 189 ½   */
-   case G_CHAR_DEL      : x_ch = 'd'  ;  break;    /*   100 d = 190 ¾   */
-   case G_CHAR_BS       : x_ch = 'b'  ;  break;    /*    98 b = 191 ¿   */
-                          /*---(super/sub)-----------------*/
-   case G_CHAR_SUB0     : x_ch = '5'  ;  break;    /*    53 5 = 192 À   */
-   case G_CHAR_SUB1     : x_ch = '6'  ;  break;    /*    54 6 = 193 Á   */
-   case G_CHAR_SUB2     : x_ch = '7'  ;  break;    /*    55 7 = 194 Â   */
-   case G_CHAR_SUB3     : x_ch = '8'  ;  break;    /*    56 8 = 195 Ã   */
-   case G_CHAR_SUB4     : x_ch = '9'  ;  break;    /*    57 9 = 196 Ä   */
-   case G_CHAR_SUBN     : x_ch = 'z'  ;  break;    /*   122 z = 197 Å   */
-   case G_CHAR_POW2     : x_ch = '2'  ;  break;    /*    50 2 = 198 Æ   */
-   case G_CHAR_POW3     : x_ch = '3'  ;  break;    /*    51 3 = 199 Ç   */
-   case G_CHAR_POW4     : x_ch = '4'  ;  break;    /*    52 4 = 200 È   */
-   case G_CHAR_POWX     : x_ch = 'x'  ;  break;    /*   120 x = 201 É   */
-   case G_CHAR_POWY     : x_ch = 'y'  ;  break;    /*   121 y = 202 Ê   */
-   case G_CHAR_SMHASH   : x_ch = '#'  ;  break;    /*    35 # = 203 Ë   */
-   case G_CHAR_DEGREE   : x_ch = 'a'  ;  break;    /*    97 a = 204 Ì   */
-   case G_CHAR_RADIAN   : x_ch = 'r'  ;  break;    /*   114 r = 205 Í   */
-   case G_CHAR_SQRT     : x_ch = '1'  ;  break;    /*    49 1 = 206 Î   */
-                          /*---(logic)---------------------*/
-   case G_CHAR_AND      : x_ch = '&'  ;  break;    /*    38 & = 208 Ð   */
-   case G_CHAR_OR       : x_ch = '|'  ;  break;    /*   124 | = 209 Ñ   */
-   case G_CHAR_XOR      : x_ch = '^'  ;  break;    /*    94 ^ = 210 Ò   */
-   case G_CHAR_UP       : x_ch = 'k'  ;  break;    /*   107 k = 211 Ó   */
-   case G_CHAR_DOWN     : x_ch = 'j'  ;  break;    /*   106 j = 212 Ô   */
-   case G_CHAR_RIGHT    : x_ch = 'l'  ;  break;    /*   108 l = 213 Õ   */
-   case G_CHAR_LEFT     : x_ch = 'h'  ;  break;    /*   104 h = 214 Ö   */
-   case G_CHAR_LE       : x_ch = '<'  ;  break;    /*    60 < = 221 Ý   */
-   case G_CHAR_GE       : x_ch = '>'  ;  break;    /*    62 > = 222 Þ   */
-   case G_CHAR_NE       : x_ch = '/'  ;  break;    /*    61 = = 223 ß   */
-   case G_CHAR_EQUIV    : x_ch = '='  ;  break;    /*    47 = = 229 å   */
-   case G_CHAR_APPROX   : x_ch = '~'  ;  break;    /*   126 ~ = 230 æ   */
-   case G_CHAR_RANGE    : x_ch = '$'  ;  break;    /*    36 $ = 177 ±   */
-                          /*---(greek)---------------------*/
-   case G_CHAR_ALPHA    : x_ch = 'A'  ;  break;    /*    65 A = 232 è   */
-   case G_CHAR_BETA     : x_ch = 'B'  ;  break;    /*    66 B = 233 é   */
-   case G_CHAR_GAMMA    : x_ch = 'G'  ;  break;    /*    71 G = 234 ê   */
-   case G_CHAR_DELTA    : x_ch = 'D'  ;  break;    /*    68 D = 235 ë   */
-   case G_CHAR_EPSILON  : x_ch = 'E'  ;  break;    /*    69 E = 236 ì   */
-   case G_CHAR_ZETA     : x_ch = 'Z'  ;  break;    /*    90 Z = 237 í   */
-   case G_CHAR_ETA      : x_ch = 'H'  ;  break;    /*    72 H = 238 î   */
-   case G_CHAR_THETA    : x_ch = 'Y'  ;  break;    /*    89 Y = 239 ï   */
-   case G_CHAR_IOTA     : x_ch = 'I'  ;  break;    /*    73 I = 240 ð   */
-   case G_CHAR_KAPPA    : x_ch = 'K'  ;  break;    /*    75 K = 241 ñ   */
-   case G_CHAR_LAMBDA   : x_ch = 'L'  ;  break;    /*    76 L = 242 ò   */
-   case G_CHAR_MU       : x_ch = 'M'  ;  break;    /*    77 M = 243 ó   */
-   case G_CHAR_NU       : x_ch = 'N'  ;  break;    /*    78 N = 244 ô   */
-   case G_CHAR_XI       : x_ch = 'X'  ;  break;    /*    88 X = 245 õ   */
-   case G_CHAR_OMICRON  : x_ch = 'O'  ;  break;    /*    79 O = 246 ö   */
-   case G_CHAR_PI       : x_ch = 'P'  ;  break;    /*    80 P = 247 ÷   */
-   case G_CHAR_RHO      : x_ch = 'R'  ;  break;    /*    82 R = 248 ø   */
-   case G_CHAR_SIGMA    : x_ch = 'S'  ;  break;    /*    83 S = 249 ù   */
-   case G_CHAR_TAU      : x_ch = 'T'  ;  break;    /*    84 T = 250 ú   */
-   case G_CHAR_UPSILON  : x_ch = 'U'  ;  break;    /*    85 U = 251 û   */
-   case G_CHAR_PHI      : x_ch = 'F'  ;  break;    /*    70 F = 252 ü   */
-   case G_CHAR_CHI      : x_ch = 'C'  ;  break;    /*    67 C = 253 ý   */
-   case G_CHAR_PSI      : x_ch = 'Q'  ;  break;    /*    81 Q = 254 þ   */
-   case G_CHAR_OMEGA    : x_ch = 'W'  ;  break;    /*    87 W = 255 ÿ   */
-   default : return rce;  break;
+   /*---(header)-------------------------*/
+   DEBUG_DESK   yLOG_enter   (__FUNCTION__);
+   /*---(find)---------------------------*/
+   rc = ychrbackward (a_ch, &x_slash, &x_base);
+   if (rc == 0) {
+      DEBUG_DESK   yLOG_note    ("match not found");
+      DEBUG_DESK   yLOG_exit    (__FUNCTION__);
+      return 0;
    }
-   yx11_keys__normal (x_ch);
-   s_orig = a_ch;
-   s_char = x_ch;
-   s_slash = 1;
-   return x_ch;
+   DEBUG_DESK   yLOG_complex ("trans"     , "%d  %c", x_slash, x_base);
+   /*> switch (a_ch) {                                                                                                 <* 
+    *> case G_CHAR_FIELD    : x_ch = 'f'  ;  break;    /+   102 f = 167 §   +/                                         <* 
+    *> case G_CHAR_REXCLAM  : x_ch = '!'  ;  break;    /+    33 ! = 161 ¡   +/                                         <* 
+    *> case G_CHAR_RQUEST   : x_ch = '?'  ;  break;    /+    63 ? = 162 ¢   +/                                         <* 
+    *>                        /+---(hidden)--------------------+/                                                      <* 
+    *> case G_CHAR_NULL     : x_ch = '0'  ;  break;    /+    48 0 = 163 £   +/                                         <* 
+    *> case G_CHAR_PLACE    : x_ch = 'p'  ;  break;    /+   112 p = 164 ¤   +/                                         <* 
+    *> case G_CHAR_ESCAPE   : x_ch = 'e'  ;  break;    /+   101 e = 165 ¥   +/                                         <* 
+    *> case G_CHAR_RETURN   : x_ch = 'n'  ;  break;    /+   110 n = 166 ¦   +/                                         <* 
+    *> case G_CHAR_GROUP    : x_ch = 'g'  ;  break;    /+   103 g = 168 ¨   +/                                         <* 
+    *>                        /+---(macro)---------------------+/                                                      <* 
+    *> case G_CHAR_DISPLAY  : x_ch = '+'  ;  break;    /+    43 + = 169 ©   +/                                         <* 
+    *> case G_CHAR_BREAK    : x_ch = '.'  ;  break;    /+    46 . = 170 ª   +/                                         <* 
+    *> case G_CHAR_WAIT     : x_ch = ','  ;  break;    /+    44 , = 171 «   +/                                         <* 
+    *> case G_CHAR_HALT     : x_ch = 'q'  ;  break;    /+   113 q = 179 ³   +/                                         <* 
+    *> case G_CHAR_BIGDOT   : x_ch = '\'' ;  break;    /+    39 ' = 207 ´   +/                                         <* 
+    *> case G_CHAR_HUGEDOT  : x_ch = '@'  ;  break;    /+    64 @ = 180 Ï   +/                                         <* 
+    *>                        /+---(special)-------------------+/                                                      <* 
+    *> case G_CHAR_STORAGE  : x_ch = ' '  ;  break;    /+    32   = 178 ²   +/                                         <* 
+    *> case G_CHAR_MASK     : x_ch = '*'  ;  break;    /+    42 * = 172 ¬   +/                                         <* 
+    *>                        /+> case G_CHAR_TAB      : x_ch = 't'  ;  break;    /+   116 t = 173 ­   +/        <+/   <* 
+    *> case G_CHAR_SUMMARY  : x_ch = ':'  ;  break;    /+    58 : = 174 ®   +/                                         <* 
+    *> case G_CHAR_SYSTEM   : x_ch = '%'  ;  break;    /+    37 % = 175 ¯   +/                                         <* 
+    *>                        /+---(delayed)-------------------+/                                                      <* 
+    *> case G_CHAR_DBSLASH  : x_ch = '\\' ;  break;    /+    92 \ = 181 µ   +/                                         <* 
+    *> case G_CHAR_DDQUOTE  : x_ch = '"'  ;  break;    /+    34 " = 182 ¶   +/                                         <* 
+    *> case G_CHAR_SPACE    : x_ch = 's'  ;  break;    /+   115 s = 183 ·   +/                                         <* 
+    *>                        /+---(grouping)------------------+/                                                      <* 
+    *> case G_CHAR_SLPAREN  : x_ch = '('  ;  break;    /+    40 ( = 184 ¸   +/                                         <* 
+    *> case G_CHAR_SRPAREN  : x_ch = ')'  ;  break;    /+    41 ) = 185 ¹   +/                                         <* 
+    *> case G_CHAR_SLBRACK  : x_ch = '['  ;  break;    /+    91 [ = 186 º   +/                                         <* 
+    *> case G_CHAR_SRBRACK  : x_ch = ']'  ;  break;    /+    93 ] = 187 »   +/                                         <* 
+    *> case G_CHAR_SLCHEV   : x_ch = '{'  ;  break;    /+   123 { = 188 ¼   +/                                         <* 
+    *> case G_CHAR_SRCHEV   : x_ch = '}'  ;  break;    /+   125 } = 189 ½   +/                                         <* 
+    *> case G_CHAR_DEL      : x_ch = 'd'  ;  break;    /+   100 d = 190 ¾   +/                                         <* 
+    *> case G_CHAR_BS       : x_ch = 'b'  ;  break;    /+    98 b = 191 ¿   +/                                         <* 
+    *>                        /+---(super/sub)-----------------+/                                                      <* 
+    *> case G_CHAR_SUB0     : x_ch = '5'  ;  break;    /+    53 5 = 192 À   +/                                         <* 
+    *> case G_CHAR_SUB1     : x_ch = '6'  ;  break;    /+    54 6 = 193 Á   +/                                         <* 
+    *> case G_CHAR_SUB2     : x_ch = '7'  ;  break;    /+    55 7 = 194 Â   +/                                         <* 
+    *> case G_CHAR_SUB3     : x_ch = '8'  ;  break;    /+    56 8 = 195 Ã   +/                                         <* 
+    *> case G_CHAR_SUB4     : x_ch = '9'  ;  break;    /+    57 9 = 196 Ä   +/                                         <* 
+    *> case G_CHAR_SUBN     : x_ch = 'z'  ;  break;    /+   122 z = 197 Å   +/                                         <* 
+    *> case G_CHAR_POW2     : x_ch = '2'  ;  break;    /+    50 2 = 198 Æ   +/                                         <* 
+    *> case G_CHAR_POW3     : x_ch = '3'  ;  break;    /+    51 3 = 199 Ç   +/                                         <* 
+    *> case G_CHAR_POW4     : x_ch = '4'  ;  break;    /+    52 4 = 200 È   +/                                         <* 
+    *> case G_CHAR_POWX     : x_ch = 'x'  ;  break;    /+   120 x = 201 É   +/                                         <* 
+    *> case G_CHAR_POWY     : x_ch = 'y'  ;  break;    /+   121 y = 202 Ê   +/                                         <* 
+    *> case G_CHAR_SMHASH   : x_ch = '#'  ;  break;    /+    35 # = 203 Ë   +/                                         <* 
+    *> case G_CHAR_DEGREE   : x_ch = 'a'  ;  break;    /+    97 a = 204 Ì   +/                                         <* 
+    *> case G_CHAR_RADIAN   : x_ch = 'r'  ;  break;    /+   114 r = 205 Í   +/                                         <* 
+    *> case G_CHAR_SQRT     : x_ch = '1'  ;  break;    /+    49 1 = 206 Î   +/                                         <* 
+    *>                        /+---(logic)---------------------+/                                                      <* 
+    *> case G_CHAR_AND      : x_ch = '&'  ;  break;    /+    38 & = 208 Ð   +/                                         <* 
+    *> case G_CHAR_OR       : x_ch = '|'  ;  break;    /+   124 | = 209 Ñ   +/                                         <* 
+    *> case G_CHAR_XOR      : x_ch = '^'  ;  break;    /+    94 ^ = 210 Ò   +/                                         <* 
+    *> case G_CHAR_UP       : x_ch = 'k'  ;  break;    /+   107 k = 211 Ó   +/                                         <* 
+    *> case G_CHAR_DOWN     : x_ch = 'j'  ;  break;    /+   106 j = 212 Ô   +/                                         <* 
+    *> case G_CHAR_RIGHT    : x_ch = 'l'  ;  break;    /+   108 l = 213 Õ   +/                                         <* 
+    *> case G_CHAR_LEFT     : x_ch = 'h'  ;  break;    /+   104 h = 214 Ö   +/                                         <* 
+    *> case G_CHAR_LE       : x_ch = '<'  ;  break;    /+    60 < = 221 Ý   +/                                         <* 
+    *> case G_CHAR_GE       : x_ch = '>'  ;  break;    /+    62 > = 222 Þ   +/                                         <* 
+    *> case G_CHAR_NE       : x_ch = '/'  ;  break;    /+    61 = = 223 ß   +/                                         <* 
+    *> case G_CHAR_EQUIV    : x_ch = '='  ;  break;    /+    47 = = 229 å   +/                                         <* 
+    *> case G_CHAR_APPROX   : x_ch = '~'  ;  break;    /+   126 ~ = 230 æ   +/                                         <* 
+    *> case G_CHAR_RANGE    : x_ch = '$'  ;  break;    /+    36 $ = 177 ±   +/                                         <* 
+    *>                        /+---(greek)---------------------+/                                                      <* 
+    *> case G_CHAR_ALPHA    : x_ch = 'A'  ;  break;    /+    65 A = 232 è   +/                                         <* 
+    *> case G_CHAR_BETA     : x_ch = 'B'  ;  break;    /+    66 B = 233 é   +/                                         <* 
+    *> case G_CHAR_GAMMA    : x_ch = 'G'  ;  break;    /+    71 G = 234 ê   +/                                         <* 
+    *> case G_CHAR_DELTA    : x_ch = 'D'  ;  break;    /+    68 D = 235 ë   +/                                         <* 
+    *> case G_CHAR_EPSILON  : x_ch = 'E'  ;  break;    /+    69 E = 236 ì   +/                                         <* 
+    *> case G_CHAR_ZETA     : x_ch = 'Z'  ;  break;    /+    90 Z = 237 í   +/                                         <* 
+    *> case G_CHAR_ETA      : x_ch = 'H'  ;  break;    /+    72 H = 238 î   +/                                         <* 
+    *> case G_CHAR_THETA    : x_ch = 'Y'  ;  break;    /+    89 Y = 239 ï   +/                                         <* 
+    *> case G_CHAR_IOTA     : x_ch = 'I'  ;  break;    /+    73 I = 240 ð   +/                                         <* 
+    *> case G_CHAR_KAPPA    : x_ch = 'K'  ;  break;    /+    75 K = 241 ñ   +/                                         <* 
+    *> case G_CHAR_LAMBDA   : x_ch = 'L'  ;  break;    /+    76 L = 242 ò   +/                                         <* 
+    *> case G_CHAR_MU       : x_ch = 'M'  ;  break;    /+    77 M = 243 ó   +/                                         <* 
+    *> case G_CHAR_NU       : x_ch = 'N'  ;  break;    /+    78 N = 244 ô   +/                                         <* 
+    *> case G_CHAR_XI       : x_ch = 'X'  ;  break;    /+    88 X = 245 õ   +/                                         <* 
+    *> case G_CHAR_OMICRON  : x_ch = 'O'  ;  break;    /+    79 O = 246 ö   +/                                         <* 
+    *> case G_CHAR_PI       : x_ch = 'P'  ;  break;    /+    80 P = 247 ÷   +/                                         <* 
+    *> case G_CHAR_RHO      : x_ch = 'R'  ;  break;    /+    82 R = 248 ø   +/                                         <* 
+    *> case G_CHAR_SIGMA    : x_ch = 'S'  ;  break;    /+    83 S = 249 ù   +/                                         <* 
+    *> case G_CHAR_TAU      : x_ch = 'T'  ;  break;    /+    84 T = 250 ú   +/                                         <* 
+    *> case G_CHAR_UPSILON  : x_ch = 'U'  ;  break;    /+    85 U = 251 û   +/                                         <* 
+    *> case G_CHAR_PHI      : x_ch = 'F'  ;  break;    /+    70 F = 252 ü   +/                                         <* 
+    *> case G_CHAR_CHI      : x_ch = 'C'  ;  break;    /+    67 C = 253 ý   +/                                         <* 
+    *> case G_CHAR_PSI      : x_ch = 'Q'  ;  break;    /+    81 Q = 254 þ   +/                                         <* 
+    *> case G_CHAR_OMEGA    : x_ch = 'W'  ;  break;    /+    87 W = 255 ÿ   +/                                         <* 
+    *> default : return rce;  break;                                                                                   <* 
+    *> }                                                                                                               <*/
+   yx11_keys__normal (x_base);
+   /*> s_orig = a_ch;                                                                 <* 
+    *> s_char = x_ch;                                                                 <* 
+    *> s_slash = 1;                                                                   <*/
+   /*---(saveback)-----------------------*/
+   s_orig  = s_char = a_ch;
+   s_slash = x_slash;
+   /*---(complete)-----------------------*/
+   DEBUG_DESK   yLOG_exit    (__FUNCTION__);
+   return 1;
 }
 
 char
-yx11_keys__extra        (uchar a_ch)
+yx11_keys__more         (uchar a_ch)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -347,20 +428,20 @@ yx11_keys__extra        (uchar a_ch)
    /*---(defense)------------------------*/
    yx11_keys__reset ();
    switch (a_ch) {
-   /*> case G_CHAR_BECAUSE    : x_ch = 't'  ;    break;                               <* 
-    *> case G_CHAR_FOREACH    : x_ch = 'a'  ;    break;                               <* 
-    *> case G_CHAR_EXISTS     : x_ch = 'e'  ;    break;                               <* 
-    *> case G_CHAR_IMPLIES    : x_ch = 'i'  ;    break;                               <* 
-    *> case G_CHAR_PROVES     : x_ch = 'p'  ;    break;                               <* 
-    *> case G_CHAR_FORCES     : x_ch = 'f'  ;    break;                               <* 
-    *> case G_CHAR_CONTRA     : x_ch = 'c'  ;    break;                               <* 
-    *> case G_CHAR_UNION      : x_ch = 'j'  ;    break;                               <* 
-    *> case G_CHAR_INTERSECT  : x_ch = 'k'  ;    break;                               <* 
-    *> case G_CHAR_SUBSET     : x_ch = 'h'  ;    break;                               <* 
-    *> case G_CHAR_SUPERSET   : x_ch = 'l'  ;    break;                               <* 
-    *> case G_CHAR_MEMBER     : x_ch = 'm'  ;    break;                               <* 
-    *> case G_CHAR_ONLYIF     : x_ch = 'o'  ;    break;                               <*/
-   /*> default : return rce;  break;                                                  <*/
+      /*> case G_CHAR_BECAUSE    : x_ch = 't'  ;    break;                               <* 
+       *> case G_CHAR_FOREACH    : x_ch = 'a'  ;    break;                               <* 
+       *> case G_CHAR_EXISTS     : x_ch = 'e'  ;    break;                               <* 
+       *> case G_CHAR_IMPLIES    : x_ch = 'i'  ;    break;                               <* 
+       *> case G_CHAR_PROVES     : x_ch = 'p'  ;    break;                               <* 
+       *> case G_CHAR_FORCES     : x_ch = 'f'  ;    break;                               <* 
+       *> case G_CHAR_CONTRA     : x_ch = 'c'  ;    break;                               <* 
+       *> case G_CHAR_UNION      : x_ch = 'j'  ;    break;                               <* 
+       *> case G_CHAR_INTERSECT  : x_ch = 'k'  ;    break;                               <* 
+       *> case G_CHAR_SUBSET     : x_ch = 'h'  ;    break;                               <* 
+       *> case G_CHAR_SUPERSET   : x_ch = 'l'  ;    break;                               <* 
+       *> case G_CHAR_MEMBER     : x_ch = 'm'  ;    break;                               <* 
+       *> case G_CHAR_ONLYIF     : x_ch = 'o'  ;    break;                               <*/
+      /*> default : return rce;  break;                                                  <*/
    }
    yx11_keys__normal (x_ch);
    s_orig = a_ch;
@@ -368,6 +449,22 @@ yx11_keys__extra        (uchar a_ch)
    s_slash = 2;
    return x_ch;
 }
+
+/*
+ *
+ *   <Cc>  control-c
+ *   <Ac>  alt-c
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
 
 char
 yX11_keys_send          (long a_window, uchar *a_keys)
@@ -378,6 +475,7 @@ yX11_keys_send          (long a_window, uchar *a_keys)
    int         i           =    0;
    /*---(header)-------------------------*/
    DEBUG_DESK   yLOG_enter   (__FUNCTION__);
+   DEBUG_DESK   yLOG_complex ("a_args"    , "%x, %p", a_window, a_keys);
    /*---(defense)-------------------------------*/
    rc = yx11_base_defense ();
    DEBUG_DESK   yLOG_value   ("defense"   , rc);
@@ -400,57 +498,48 @@ yX11_keys_send          (long a_window, uchar *a_keys)
    for (i = 0; i < x_len; ++i) {
       DEBUG_DESK   yLOG_complex ("key"       , "%2d %3d %c %s", i, a_keys [i], a_keys [i], s_mods);
       switch (a_keys [i]) {
-      case (uchar) 'Õ' :
-         s_long  = 0xff09;
-         DEBUG_DESK   yLOG_value   ("blitz"    , s_long);
-         break;
-      case (uchar) 'Ö' :
-         s_long  = 0xff08;
-         DEBUG_DESK   yLOG_value   ("unblitz"  , s_long);
-         break;
-      case (uchar) 'Ó' :
-         DEBUG_DESK   yLOG_note    ("control Ó or hyper ÓÓ");
-         if (s_mods [S_CTRL] == 'y') {
-            s_mods [S_HYPE] = 'y';
-            s_mods [S_CTRL] = '-';
-         } else s_mods [S_CTRL] = 'y';
-         continue;
-         break;
-      case (uchar) 'Ô' :
-         DEBUG_DESK   yLOG_note    ("alt Ô or super ÔÔ");
-         if (s_mods [S_ALTT] == 'y') {
-            s_mods [S_SUPR] = 'y';
-            s_mods [S_ALTT] = '-';
-         } else s_mods [S_ALTT] = 'y';
-         continue;
-         break;
-      case (uchar) '²' :
-         s_long  = XK_space;
-         DEBUG_DESK   yLOG_value   ("spacer"   , s_long);
-         break;
-      case (uchar) '·' :
+         /*> case (uchar) 'Õ' :                                                          <* 
+          *>    s_long  = 0xff09;                                                        <* 
+          *>    DEBUG_DESK   yLOG_value   ("blitz"    , s_long);                         <* 
+          *>    break;                                                                   <*/
+         /*> case (uchar) 'Ö' :                                                          <* 
+          *>    s_long  = 0xff08;                                                        <* 
+          *>    DEBUG_DESK   yLOG_value   ("unblitz"  , s_long);                         <* 
+          *>    break;                                                                   <*/
+         /*> case (uchar) 'Ó' :                                                          <* 
+          *>    DEBUG_DESK   yLOG_note    ("control Ó or hyper ÓÓ");                     <* 
+          *>    if (s_mods [S_CTRL] == 'y') {                                            <* 
+          *>       s_mods [S_HYPE] = 'y';                                                <* 
+          *>       s_mods [S_CTRL] = '-';                                                <* 
+          *>    } else s_mods [S_CTRL] = 'y';                                            <* 
+          *>    continue;                                                                <* 
+          *>    break;                                                                   <*/
+         /*> case (uchar) 'Ô' :                                                          <* 
+          *>    DEBUG_DESK   yLOG_note    ("alt Ô or super ÔÔ");                         <* 
+          *>    if (s_mods [S_ALTT] == 'y') {                                            <* 
+          *>       s_mods [S_SUPR] = 'y';                                                <* 
+          *>       s_mods [S_ALTT] = '-';                                                <* 
+          *>    } else s_mods [S_ALTT] = 'y';                                            <* 
+          *>    continue;                                                                <* 
+          *>    break;                                                                   <*/
+      case (uchar) '·' :  /* IGORE, normal spacer */
          DEBUG_DESK   yLOG_note    ("spacer");
          continue;
          break;
-      case (uchar) '\n': case (uchar) '¦' :
-         s_long  = 0xff0d;
-         DEBUG_DESK   yLOG_value   ("return"   , s_long);
-         break;
-      case (uchar) '\e': case (uchar) '¥' :
-         s_long  = 0xff1b;
-         DEBUG_DESK   yLOG_value   ("escape"   , s_long);
+      case (uchar) '²' :  /* SPACE */
+         s_long  = XK_space;
+         DEBUG_DESK   yLOG_value   ("space"    , s_long);
          break;
       default          : 
          if        (a_keys [i] <  32) {
-            continue; 
+            rc = yx11_keys__control  (a_keys [i]);
+            if (rc == 0)  continue; 
          } else if (a_keys [i] < 127) {
-            yx11_keys__normal   (a_keys [i]);
-         } else if (a_keys [i] < 161) {
-            continue; 
+            rc = yx11_keys__normal   (a_keys [i]);
+            if (rc == 0)  continue; 
          } else  {
-            yx11_keys__reset ();
-            rc = yx11_keys__extended (a_keys [i]);
-            if (rc < 0)  rc = yx11_keys__extra (a_keys [i]);
+            rc = yx11_keys__slashed (a_keys [i]);
+            if (rc == 0)  continue; 
          }
          break;
       }
@@ -463,6 +552,14 @@ yX11_keys_send          (long a_window, uchar *a_keys)
       s_protect = 0;
    }
    DEBUG_DESK   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+yX11_keys_send_current  (uchar *a_keys)
+{
+   yX11_focus ();
+   yX11_keys_send (YX_FOCU, a_keys);
    return 0;
 }
 
@@ -494,7 +591,8 @@ yX11__unit_keys         (char *a_question, int a_num)
    ystrlcpy (unit_answer, "KEYS unit        : unknown request", LEN_RECD);
    /*---(string testing)-----------------*/
    if      (strncmp (a_question, "symkey"  , 20)  == 0) {
-      snprintf (unit_answer, LEN_RECD, "KEYS symkey      : orig %c/%-3d, char %c/%-3d, sym %-8d, slash %d, mods %-6.6s", s_orig, (uchar) s_orig, s_char, (uchar) s_char, s_long, s_slash, s_mods);
+      if (s_long == 0)  snprintf (unit_answer, LEN_RECD, "KEYS symkey      : orig ·/···, char ·/···, sym õ····, slash ·, mods ······");
+      else              snprintf (unit_answer, LEN_RECD, "KEYS symkey      : orig %c/%-3d, char %c/%-3d, sym õ%04x, slash %d, mods %-6.6s", ychrvisible (s_orig), (uchar) s_orig, ychrvisible (s_char), (uchar) s_char, s_long, s_slash, s_mods);
    }
    /*---(complete)-----------------------*/
    return unit_answer;

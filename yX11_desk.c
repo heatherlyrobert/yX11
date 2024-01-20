@@ -113,7 +113,10 @@ yx11_desk_inventory     (char a_real)
    /*---(initialize)---------------------*/
    yx11_desk_purge ();
    /*---(generate data)------------------*/
-   if (a_real == 'y')  rc = system ("wmctrl -d > /tmp/yX11_desktops.txt");
+   if (a_real == 'y') {
+      system ("chmod 0666 /tmp/yX11_desktops.txt 2>&1  > /dev/null");
+      rc = system ("wmctrl -d > /tmp/yX11_desktops.txt");
+   }
    /*---(open)---------------------------*/
    f = fopen ("/tmp/yX11_desktops.txt", "rt");
    DEBUG_DESK   yLOG_point   ("fopen"     , f);
