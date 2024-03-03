@@ -435,6 +435,31 @@ yX11_win_exact          (long a_win, char d, int x, int y, int w, int t)
    return rc;
 }
 
+static long        s_win;
+static int         s_desk, s_left, s_topp, s_wide, s_tall;
+
+char
+yX11_win_push           (int x, int y, int w, int t)
+{
+   s_win = yX11_win_current (NULL, NULL);
+   yX11_win_where (s_win, &s_desk, &s_left, &s_topp, &s_wide, &s_tall);
+   if (x == -1)  x = s_left;
+   if (y == -1)  y = s_topp;
+   if (w == -1)  w = s_wide;
+   if (t == -1)  t = s_tall;
+   yX11_yvikeys_myhome (x, y);
+   yX11_yvikeys_mysize (w, t);
+   return 0;
+}
+
+char
+yX11_win_pop            (void)
+{
+   yX11_yvikeys_myhome (s_left, s_topp);
+   yX11_yvikeys_mysize (s_wide, s_tall);
+   return 0;
+}
+
 
 
 /*====================------------------------------------====================*/

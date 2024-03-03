@@ -87,6 +87,9 @@ char        yX11_win_place          (long a_win, char a_desk, char a_abbr, char 
 char        yX11_win_exact          (long a_win, char d, int x, int y, int w, int t);
 char        yX11_win_where          (long a_win, char *d, int *x, int *y, int *w, int *t); 
 
+char        yX11_win_push           (int x, int y, int w, int t);
+char        yX11_win_pop            (void);
+
 char        yX11_win_by_cursor      (char a_move, long *r_id, char *r_desk, char *r_title, char *r_type, char *r_curr, short *r_left, short *r_topp, char *a_scrn, char *a_locn, short *r_wide, short *r_tall, char *a_size);
 long        yX11_win_current        (char *a_name, char *a_desk);
 char        yX11_win_verify         (long a_win);
