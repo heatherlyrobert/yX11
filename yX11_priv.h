@@ -36,8 +36,8 @@
 
 #define     P_VERMAJOR  "1.--  working for everyday use, evolving but stable"
 #define     P_VERMINOR  "1.1-  adding desktop control for zeus and scripting"
-#define     P_VERNUM    "1.1f"
-#define     P_VERTXT    "added single-level push/pop for win position to support unit testing"
+#define     P_VERNUM    "1.1g"
+#define     P_VERTXT    "added save to single-level push/pop for win position to support unit testing"
 
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"

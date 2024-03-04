@@ -40,6 +40,9 @@ int          s_nwin       = 0;  /* public to assist unit testing    */
 
 
 
+static char s_print     [LEN_RECD]  = "";
+
+
 
 /*====================------------------------------------====================*/
 /*===----                       program level                          ----===*/
@@ -439,6 +442,22 @@ yX11_win_where          (long a_win, char *d, int *x, int *y, int *w, int *t)
    /*---(trouble)------------------------*/
    DEBUG_DESK   yLOG_exit    (__FUNCTION__);
    return n;
+}
+
+char*
+yX11_win_where_unit     (long a_win)
+{
+   char        rc          =    0;
+   long        x_win       =    0;
+   char        d;
+   int         x, y, w, t;
+   char        p           [LEN_LABEL] = "";
+   if (a_win == -1)  x_win = yX11_win_current (NULL, NULL);
+   else              x_win = a_win;
+   rc = yX11_win_where (x_win, &d, &x, &y, &w, &t);
+   sprintf (p, "%10x", x_win);
+   sprintf (s_print, "X11 where        : %-12.12s  %1d  %4dx  %4dy  %4dw  %4dt", p, d, x, y, w, t);
+   return s_print;
 }
 
 long

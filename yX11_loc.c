@@ -439,6 +439,14 @@ static long        s_win;
 static int         s_desk, s_left, s_topp, s_wide, s_tall;
 
 char
+yX11_win_save           (void)
+{
+   s_win = yX11_win_current (NULL, NULL);
+   yX11_win_where (s_win, &s_desk, &s_left, &s_topp, &s_wide, &s_tall);
+   return 0;
+}
+
+char
 yX11_win_push           (int x, int y, int w, int t)
 {
    s_win = yX11_win_current (NULL, NULL);

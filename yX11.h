@@ -86,7 +86,9 @@ long        yX11_term               (char a_desk, char a_abbr, char a_scrn, char
 char        yX11_win_place          (long a_win, char a_desk, char a_abbr, char a_scrn);
 char        yX11_win_exact          (long a_win, char d, int x, int y, int w, int t);
 char        yX11_win_where          (long a_win, char *d, int *x, int *y, int *w, int *t); 
+char*       yX11_win_where_unit     (long a_win);
 
+char        yX11_win_save           (void);
 char        yX11_win_push           (int x, int y, int w, int t);
 char        yX11_win_pop            (void);
 
