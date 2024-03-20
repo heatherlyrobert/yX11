@@ -36,8 +36,8 @@
 
 #define     P_VERMAJOR  "1.--  working for everyday use, evolving but stable"
 #define     P_VERMINOR  "1.1-  adding desktop control for zeus and scripting"
-#define     P_VERNUM    "1.1i"
-#define     P_VERTXT    "built grabc-like yX11_grabc to get window color at pixel"
+#define     P_VERNUM    "1.1j"
+#define     P_VERTXT    "yX11_keys_send handles ¦ and ¥ same as macros"
 
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
