@@ -329,12 +329,13 @@ yx11_loc_sizing         (char a_abbr, char a_scrn, int *a_left, int *a_topp, int
    char        n           =    0;
    /*---(header)-------------------------*/
    DEBUG_DESK   yLOG_enter   (__FUNCTION__);
+   DEBUG_DESK   yLOG_char    ("a_abbr"    , a_abbr);
+   DEBUG_DESK   yLOG_char    ("a_scrn"    , a_scrn);
    /*---(defaults)-----------------------*/
    if (a_left != NULL)  *a_left = 0;
    if (a_topp != NULL)  *a_topp = 0;
    if (a_wide != NULL)  *a_wide = 0;
    if (a_tall != NULL)  *a_tall = 0;
-   DEBUG_DESK   yLOG_enter   (__FUNCTION__);
    /*---(search)-------------------------*/
    for (i = 0; i < s_nloc; ++i) {
       /*---(filter)----------------------*/

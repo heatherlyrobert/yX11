@@ -277,6 +277,7 @@ yx11_yvikeys__desktop   (char a_desk)
    DEBUG_DESK   yLOG_enter   (__FUNCTION__);
    DEBUG_DESK   yLOG_value   ("a_desk"    , a_desk);
    /*---(direct id)----------------------*/
+   DEBUG_DESK   yLOG_value   ("s_ndesk"   , s_ndesk);
    --rce;  if  (a_desk >=  0  && a_desk < s_ndesk      ) {
       DEBUG_DESK   yLOG_exit   (__FUNCTION__);
       return a_desk;

@@ -61,7 +61,23 @@ yX11_reset              (void)
    return 0;
 }
 
-
+char
+yX11_start_unit         (void)
+{
+   char        rc          =    0;
+   /*---(header)---------------------------*/
+   DEBUG_YXWIN   yLOG_enter   (__FUNCTION__);
+   DEBUG_YXINIT printf("   - start executing setup functions\n\n");
+   rc = yX11_base__connect   ();
+   DEBUG_YXWIN   yLOG_value   ("b connect" , rc);
+   rc = yX11_opengl__connect ();
+   DEBUG_YXWIN   yLOG_value   ("o connect" , rc);
+   rc = yX11_reset           ();
+   DEBUG_YXWIN   yLOG_value   ("reset"     , rc);
+   /*---(complete)-------------------------*/
+   DEBUG_YXWIN   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
 
 
 

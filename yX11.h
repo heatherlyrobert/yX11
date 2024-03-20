@@ -7,6 +7,7 @@
 
 
 
+#include <ySTR_solo.h>
 #include <X11/X.h>                   /* main header                           */
 #include <X11/Xlib.h>                /* c-api (xlib) header                   */
 
@@ -51,6 +52,7 @@ char        yX11_resize             (int a_wide, int a_tall);
 char        yX11_move               (int a_xpos, int a_ypos);
 char        yX11_end                (void);
 ulong       yX11_focus              (void);
+char        yX11_start_unit         (void);
 
 
 /*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
@@ -125,6 +127,10 @@ char        yX11_yvikeys_mysize     (int w, int t);
 char        yX11_yvikeys_mysizer    (int w, int t, int m, int s);
 
 char        yX11_yvikeys_name       (uchar *a_string);
+
+char        yX11_win_grabc          (long a_win, char a_type, short x, short y, char r_hex [LEN_TITLE], uchar *r_red, uchar *r_grn, uchar *r_blu);
+char        yX11_root_grabc         (short x_left, short x_topp, short x, short y, char r_hex [LEN_TITLE], uchar *r_red, uchar *r_grn, uchar *r_blu);
+
 
 #endif
 
