@@ -120,6 +120,70 @@ yx11_keys__timestamp    (void)
 }
 
 char             /* [------] pass a key to the appropriate window ------------*/
+yx11_keys__sendheld     (char *a_mods, char a_dir)
+{
+   /*---(design notes)-------------------*/
+   /*
+    *   1) shift
+    *   2) mode
+    *   3) control
+    *   4) alt
+    *   5) hyper
+    *   6) super
+    */
+   /*---(locals)-----------+-----------+-*/
+   char        tmp         [10];
+   char        rc          = 0;
+   /*---(header)-------------------------*/
+   DEBUG_DESK   yLOG_enter   (__FUNCTION__);
+   DEBUG_DESK   yLOG_char    ("S_HYPE"    , a_mods [S_HYPE]);
+   if (a_mods [S_HYPE] != 'Y') {
+      DEBUG_DESK   yLOG_note    ("hyper not held, nothing to do");
+      DEBUG_DESK   yLOG_exit    (__FUNCTION__);
+      return 0;
+   }
+   /*---(set basic xsendevent fields)----*/
+   DEBUG_DESK   yLOG_note    ("set header fields");
+   YX_SKEY.display     = YX_DISP;
+   YX_SKEY.window      = YX_ROOT;
+   YX_SKEY.send_event  = 1;
+   YX_SKEY.root        = YX_ROOT;
+   YX_SKEY.subwindow   = None;
+   YX_SKEY.time        = yx11_keys__timestamp ();
+   YX_SKEY.x           = 1;
+   YX_SKEY.y           = 1;
+   YX_SKEY.x_root      = 1;
+   YX_SKEY.y_root      = 1;
+   YX_SKEY.same_screen = 1;
+   /*> YX_SKEY.state       = 0;                                                       <*/
+   YX_SKEY.state      |= Mod5Mask;;
+   /*---(set mods and key)------------*/
+   YX_SKEY.keycode     = XKeysymToKeycode (YX_DISP, XK_Alt_L);
+   DEBUG_DESK   yLOG_value   ("keycode"   , YX_SKEY.keycode);
+   /*---(keypress side)---------------*/
+   if (a_dir == 'p') {
+      DEBUG_DESK   yLOG_note    ("send key press");
+      YX_SKEY.time        = yx11_keys__timestamp ();
+      YX_SKEY.type        = KeyPress;
+      XSendEvent(YX_DISP, YX_SKEY.window, 0, KeyPressMask, (XEvent *) &YX_SKEY);
+   }
+   /*---(keyrelease side)-------------*/
+   if (a_dir == 'r') {
+      DEBUG_DESK   yLOG_note    ("send key release");
+      YX_SKEY.time        = yx11_keys__timestamp ();
+      YX_SKEY.type        = KeyRelease;
+      XSendEvent(YX_DISP, YX_SKEY.window, 0, KeyReleaseMask, (XEvent *) &YX_SKEY);
+   }
+   /*---(sync it up)------------------*/
+   DEBUG_DESK   yLOG_note    ("sync and flush");
+   XSync (YX_DISP, 1);
+   XFlush(YX_DISP);
+   /*---(complete)-----------------------*/
+   DEBUG_DESK   yLOG_exit    (__FUNCTION__);
+   return;
+}
+
+char             /* [------] pass a key to the appropriate window ------------*/
 yx11_keys__sendone      (long a_window, char *a_mods, u_long a_keysym)
 {
    /*---(design notes)-------------------*/
@@ -153,7 +217,14 @@ yx11_keys__sendone      (long a_window, char *a_mods, u_long a_keysym)
    YX_SKEY.state       = 0;
    /*---(window manager keys)------------*/
    DEBUG_DESK   yLOG_note    ("check for super/hyper");
-   if (a_mods [S_HYPE] == 'y' || a_mods [S_SUPR] == 'y')  YX_SKEY.window = YX_ROOT;
+   if (strchr ("Yy", a_mods [S_HYPE]) != NULL) {
+      DEBUG_DESK   yLOG_note    ("hyper forces window to root");
+      YX_SKEY.window = YX_ROOT;
+   }
+   if (strchr ("Yy", a_mods [S_SUPR]) != NULL)  {
+      DEBUG_DESK   yLOG_note    ("super forces window to root");
+      YX_SKEY.window = YX_ROOT;
+   }
    /*---(set mods and key)------------*/
    DEBUG_DESK   yLOG_note    ("do state masking");
    YX_SKEY.state       = 0;
@@ -162,6 +233,7 @@ yx11_keys__sendone      (long a_window, char *a_mods, u_long a_keysym)
    if (a_mods [S_CTRL] == 'y')  YX_SKEY.state      |= ControlMask;
    if (a_mods [S_ALTT] == 'y')  YX_SKEY.state      |= Mod1Mask;;
    if (a_mods [S_HYPE] == 'y')  YX_SKEY.state      |= Mod5Mask;;
+   if (a_mods [S_HYPE] == 'Y')  YX_SKEY.state      |= Mod5Mask;;
    if (a_mods [S_SUPR] == 'y')  YX_SKEY.state      |= Mod4Mask;;
    DEBUG_DESK   yLOG_value   ("state"     , YX_SKEY.state);
    DEBUG_DESK   yLOG_note    ("translate keysym");
@@ -194,6 +266,10 @@ yx11_keys__reset        (void)
    s_long  = 0;
    s_mods [S_SHFT] = '·';
    s_mods [S_MODE] = '·';
+   /*> if (s_mods [S_HYPE] != 'Y')  s_mods [S_HYPE] = '·';                            <* 
+    *> if (s_mods [S_SUPR] != 'Y')  s_mods [S_SUPR] = '·';                            <* 
+    *> s_mods [S_CTRL] = '·';                                                         <* 
+    *> s_mods [S_ALTT] = '·';                                                         <*/
    s_slash = 0;
    return 0;
 }
@@ -389,8 +465,35 @@ yX11_keys_send          (long a_window, uchar *a_keys)
           *>    s_long  = 0xff08;                                                        <* 
           *>    DEBUG_DESK   yLOG_value   ("unblitz"  , s_long);                         <* 
           *>    break;                                                                   <*/
-         /*> case (uchar) 'Ó' :                                                          <* 
-          *>    DEBUG_DESK   yLOG_note    ("control Ó or hyper ÓÓ");                     <* 
+      case (uchar) '¸' :
+         DEBUG_DESK   yLOG_note    ("modifier group beg");
+         if (s_mods [S_HYPE] == 'y') {
+            s_mods [S_HYPE] = 'Y';
+            yx11_keys__sendheld (s_mods, 'p');
+         }
+         continue;
+         break;
+      case (uchar) '¹' :
+         DEBUG_DESK   yLOG_note    ("modifier group end");
+         if (s_mods [S_HYPE] == 'Y') {
+            yx11_keys__sendheld (s_mods, 'r');
+            s_mods [S_HYPE] = '·';
+         }
+         continue;
+         break;
+      case (uchar) 'Ö' :
+         DEBUG_DESK   yLOG_note    ("hyper Ö or hyper-stick ÖÖ");
+         DEBUG_DESK   yLOG_char    ("before"    , s_mods [S_HYPE]);
+         if      (s_mods [S_HYPE] == (uchar) '·')    s_mods [S_HYPE] = 'y';
+         DEBUG_DESK   yLOG_char    ("after"     , s_mods [S_HYPE]);
+         continue;
+         break;
+      case (uchar) 'Ï' :
+         sleep (1);
+         continue;
+         break;
+         /*> case (uchar) 'Õ' :                                                          <* 
+          *>    DEBUG_DESK   yLOG_note    ("control Õ or hyper ÕÕ");                     <* 
           *>    if (s_mods [S_CTRL] == 'y') {                                            <* 
           *>       s_mods [S_HYPE] = 'y';                                                <* 
           *>       s_mods [S_CTRL] = '-';                                                <* 
@@ -438,7 +541,8 @@ yX11_keys_send          (long a_window, uchar *a_keys)
       if (s_slash == 2)  yx11_keys__sendone (a_window, "·y····", XK_l);
       yx11_keys__sendone (a_window, s_mods, s_long);
       yx11_keys__reset ();
-      ystrlcpy (s_mods, "······", LEN_TERSE);
+      /*> ystrlcpy (s_mods, "······", LEN_TERSE);                                     <*/
+      if (s_mods [S_HYPE] != 'Y')  s_mods [S_HYPE] = '·';
       s_protect = 0;
    }
    DEBUG_DESK   yLOG_exit    (__FUNCTION__);

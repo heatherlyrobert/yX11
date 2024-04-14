@@ -18,15 +18,18 @@ INST_DIR   = /usr/local/bin
 # extra include directories required
 INC_MINE   = 
 # utilities generated, separate from main program
-NAME_UTIL  = wtop
+# NAME_UTIL  = yx11
 # libraries only for the utilities
-LIB_UTIL   = -lySTR_debug -lyEXEC_debug -lyREGEX_debug
+LIB_UTIL   = 
 
 
 
 #===(post-processing)======================================#
 # create a rule for...
 #install_prep       :
+#	make util
+#	make install_util
+
 #remove_prep        :
 
 

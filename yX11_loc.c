@@ -232,6 +232,20 @@ yx11_loc_by_locn        (char a_size, short a_left, short a_topp, char *r_desc, 
    return x_abbr;
 }
 
+char
+yX11_loc_categorize     (short a_left, short a_topp, short a_wide, short a_tall, char *r_locn, char *r_scrn, char *r_size)
+{
+   char        x_locn      =  '·';
+   char        x_scrn      =  '·';
+   char        x_size      =  '·';
+   x_size = yx11_loc_by_size (a_wide, a_tall, NULL);
+   x_locn = yx11_loc_by_locn (x_size, a_left, a_topp, NULL, &x_scrn);
+   if (r_locn != NULL)  *r_locn = x_locn;
+   if (r_scrn != NULL)  *r_scrn = x_scrn;
+   if (r_size != NULL)  *r_size = x_size;
+   return 0;
+}
+
 /*====================------------------------------------====================*/
 /*===----                       program level                          ----===*/
 /*====================------------------------------------====================*/

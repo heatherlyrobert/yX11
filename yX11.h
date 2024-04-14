@@ -53,7 +53,7 @@ char        yX11_move               (int a_xpos, int a_ypos);
 char        yX11_end                (void);
 ulong       yX11_focus              (void);
 char        yX11_start_unit         (void);
-
+char        yX11_cmdline            (void);
 
 /*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
 char        yX11_window_names       (int a_max, int a_len, char *a_names []);
@@ -130,6 +130,10 @@ char        yX11_yvikeys_name       (uchar *a_string);
 
 char        yX11_win_grabc          (long a_win, char a_type, short x, short y, char r_hex [LEN_TITLE], uchar *r_red, uchar *r_grn, uchar *r_blu);
 char        yX11_root_grabc         (short x_left, short x_topp, short x, short y, char r_hex [LEN_TITLE], uchar *r_red, uchar *r_grn, uchar *r_blu);
+
+
+char        yX11_loc_categorize     (short a_left, short a_topp, short a_wide, short a_tall, char *r_locn, char *r_scrn, char *r_size);
+
 
 
 #endif
